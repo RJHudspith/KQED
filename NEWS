@@ -1,0 +1,2 @@
+22/11/19 -- compiles without warnings under -Wall
+	    free of non-static global variables
