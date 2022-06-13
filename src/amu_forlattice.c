@@ -78,7 +78,7 @@ example1( const struct QED_kernel_temps t )
   
   double x,y,z ;
   for( x = 0.005 ; x < 1 ; x += 0.2 ) {
-    for( y = 0.0 ; y < M_PI ; y += M_PI/4. ) {
+    for( y = 0.005 ; y < M_PI ; y += M_PI/4. ) {
       for( z = 0.005 ; z < 1 ; z += 0.2 ) { 
 
 	const double vi[3] = { x , y , z } ;

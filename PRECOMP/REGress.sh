@@ -12,6 +12,6 @@ done
 
 ## diff all the thread files (have to be the same!)
 for th in Thread_* ; do
-    echo "diff-in $th with Thread_0"
+    echo "diff-ing $th with Thread_0"
     diff $th Thread_0
 done
