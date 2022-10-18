@@ -1,7 +1,5 @@
 /**
   Kernel when x and y are non-zero
-  
-  TODO :: make code thread safe once more!!!
 **/
 #include "KQED.h"
 
@@ -450,6 +448,10 @@ init_STV( const double xv[4] ,
 
   const size_t thread = (size_t)omp_get_thread_num() ;
   const size_t toff = t.Grid.Nffa*thread ;
+  
+  const size_t nx1 = (size_t)t.Grid.nfx[ix1];
+  const size_t nx2 = (size_t)t.Grid.nfx[ix2];
+  const size_t nmin = (size_t)((nx1<nx2)?nx1:nx2);
 
   // y edge case
   const size_t iy1 = Inv.INVy.idx ;
@@ -457,10 +459,6 @@ init_STV( const double xv[4] ,
   if( iy2 >= (size_t)t.Grid.nstpy ) {
     iy2 = iy1 ;
   }
-  
-  const size_t nx1 = (size_t)t.Grid.nfx[ix1];
-  const size_t nx2 = (size_t)t.Grid.nfx[ix2];
-  const size_t nmin = (size_t)((nx1<nx2)?nx1:nx2);
  
   size_t i ;
   for( i = 0 ; i < (size_t)t.Grid.Nffa ; i++ ) {

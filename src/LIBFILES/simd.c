@@ -5,6 +5,37 @@
  */
 #include "KQED.h"
 
+// precompute all this business for Y
+void
+precompute_INV( struct intprecomp *INVy ,
+		const double y ,
+		const double y1 ,
+		const double y2 ,
+		const size_t idx )
+{
+  INVy -> idx = idx ;
+  register const double dy = y1-y2 ;
+  register const double ymy1 = y-y1 ;
+  register const double ymy2 = y-y2 ;
+  register const double ym2sq = (ymy2*ymy2) ;
+  register const double ym1sq = (ymy1*ymy1) ;
+  INVy -> A = -(ym2sq)*(2*y - 3*y1 + y2) ;
+  INVy -> B = (ym1sq)*(2*y + y1 - 3*y2) ;
+  INVy -> C1 = (ymy1)*(ym2sq)*dy ;
+  INVy -> C2 = (ym1sq)*(ymy2)*dy ;
+  INVy -> D = 1./(dy*dy*dy) ;
+  INVy -> lA = (y2-y)/(y2-y1) ;
+#if (defined HAVE_IMMINTRIN_H) && (defined __AVX__ ) 
+  INVy -> y12 = _mm256_setr_pd( y1, y2, y1, y2 ) ;
+  INVy -> a  = _mm256_broadcast_sd( &INVy->A  ) ;
+  INVy -> b  = _mm256_broadcast_sd( &INVy->B  ) ;
+  INVy -> c1 = _mm256_broadcast_sd( &INVy->C1 ) ;
+  INVy -> c2 = _mm256_broadcast_sd( &INVy->C2 ) ;
+  INVy -> d  = _mm256_broadcast_sd( &INVy->D  ) ;
+  INVy -> la = _mm256_broadcast_sd( &INVy->lA  ) ;
+#endif
+}
+
 #ifdef HAVE_IMMINTRIN_H
 
 #include <immintrin.h>
@@ -42,35 +73,6 @@ static __m256d *LUT4 = NULL , *LUT5 = NULL , *LUT6 = NULL ;
   *F = _mm256_add_pd( *F , _mm256_mul_pd( YMM2 , INVy.c2 ) ) ;	\
   *F = _mm256_mul_pd( *F , INVy.d ) ;
 #endif
-
-// precompute all this business for Y
-void
-precompute_INV( struct intprecomp *INVy ,
-		const double y ,
-		const double y1 ,
-		const double y2 ,
-		const size_t idx )
-{
-  INVy -> idx = idx ;
-  register const double dy = y1-y2 ;
-  register const double ymy1 = y-y1 ;
-  register const double ymy2 = y-y2 ;
-  register const double ym2sq = (ymy2*ymy2) ;
-  register const double ym1sq = (ymy1*ymy1) ;
-  INVy -> A = -(ym2sq)*(2*y - 3*y1 + y2) ;
-  INVy -> B = (ym1sq)*(2*y + y1 - 3*y2) ;
-  INVy -> C1 = (ymy1)*(ym2sq)*dy ;
-  INVy -> C2 = (ym1sq)*(ymy2)*dy ;
-  INVy -> D = 1./(dy*dy*dy) ;
-  INVy -> lA = (y2-y)/(y2-y1) ;
-  INVy -> y12 = _mm256_setr_pd( y1, y2, y1, y2 ) ;
-  INVy -> a  = _mm256_broadcast_sd( &INVy->A  ) ;
-  INVy -> b  = _mm256_broadcast_sd( &INVy->B  ) ;
-  INVy -> c1 = _mm256_broadcast_sd( &INVy->C1 ) ;
-  INVy -> c2 = _mm256_broadcast_sd( &INVy->C2 ) ;
-  INVy -> d  = _mm256_broadcast_sd( &INVy->D  ) ;
-  INVy -> la = _mm256_broadcast_sd( &INVy->lA  ) ;
-}
 
 #ifdef __FMA__
 

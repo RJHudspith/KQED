@@ -361,19 +361,15 @@ set_invariants( const double xv[4] ,
     ix2 = ix1 ;
   }
   precompute_INVx( &Inv.INVx, Inv.x, Grid.XX[ix1], Grid.XX[ix2] , ix1 ) ;
-
-  // setup InvY
-#if (defined HAVE_IMMINTRIN_H) && (defined __AVX__)
-  const size_t iy1 = (size_t)bsrch( Grid.YY , Inv.y , 0 , Grid.nstpy ) ;
   
+  // setup InvY
+  const size_t iy1 = (size_t)bsrch( Grid.YY , Inv.y , 0 , Grid.nstpy ) ;  
   // y edge case
   size_t iy2 = iy1 + 1 ;
   if( iy2 >= (size_t)Grid.nstpy ) {
     iy2 = iy1 ;
   }
   precompute_INV( &Inv.INVy , Inv.y , Grid.YY[iy1] , Grid.YY[iy2] , iy1 ) ;
-#endif
   
   return Inv ;
 }
-

@@ -5,14 +5,14 @@
 #ifndef SIMD_H
 #define SIMD_H
 
-#if (defined HAVE_IMMINTRIN_H) && (defined __AVX__)
-
 void
 precompute_INV( struct intprecomp *INVy,
 		const double y ,
 		const double y1 ,
 		const double y2 ,
 		const size_t idx ) ;
+
+#if (defined HAVE_IMMINTRIN_H) && (defined __AVX__)
 
 void
 accessv6( const int ix,
