@@ -54,7 +54,7 @@ taylorx_contrib( const struct Grid_coeffs Grid ,
   const double dg2bdx = accessv( false, true, ix, iy, dxQG2, false, d0cb, cb, y , Grid );
   D -> dg2dx = D -> ddg2dxdcb*cb; // ax*dg2adx + (1.0-ax)*dg2bdx;
 
-  const double dg2bdcb = accessv( false , true , ix, iy, QG2, false, d1cb, cb, y , Grid );
+  const double dg2bdcb = accessv( false, true , ix, iy, QG2, false, d1cb, cb, y , Grid );
   D -> dg2dcb = D -> ddg2dxdcb*x; // dg2dx*x/cb; // ax*dg2adcb + (1.0-ax)*dg2bdcb;
 
   const double dg2bdy = accessv( false, false, ix, iy, QG2, true, d0cb, cb, y , Grid );
@@ -147,8 +147,8 @@ taylorx_contrib( const struct Grid_coeffs Grid ,
   fprintf( stdout , "ddg1adcbdcb= %.11lg ddg1bdcbdcb= %.11lg\n", ddg1adcbdcb, ddg1bdcbdcb);
   fprintf( stdout , "ddg1adydcb= %.11lg ddg1bdydcb= %.11lg\n", ddg1adydcb, ddg1bdydcb);
 #endif // VERBOSE
-  
-  if(flag2) {   
+
+  if(flag2) {
     // in the case of a swap, you need the second derivative wrt y
     const double ya = Grid.YY[iy];
     const double yb = Grid.YY[iy+1] ; //ya+Grid.ystp;
@@ -159,7 +159,8 @@ taylorx_contrib( const struct Grid_coeffs Grid ,
     const double ddg2bdydy = (dg2bdy_yb-dg2bdy_ya)/Grid.ystp;
     D -> ddg2dydy = ax*ddg2adydy + (1.0-ax)*ddg2bdydy;
        
-    const double ddg1adydy = (Grid.TX[ G3Ady ][iy2_tay]- Grid.TX[ G3Bdy ][iy2_tay]-( Grid.TX[ G3Ady ][iy_tay]- Grid.TX[ G3Bdy ][iy_tay]))/(Grid.TX[YY][iy2_tay] - Grid.TX[YY][iy_tay] ) ;
+    const double ddg1adydy = (Grid.TX[ G3Ady ][iy2_tay]- Grid.TX[ G3Bdy ][iy2_tay]-\
+			      ( Grid.TX[ G3Ady ][iy_tay]- Grid.TX[ G3Bdy ][iy_tay]))/(Grid.TX[YY][iy2_tay] - Grid.TX[YY][iy_tay] ) ;
 
     const double dg3bdy_ya = accessv( false, false, ix, iy, QG3, true, d0cb, cb, ya, Grid );
     const double dg3bdy_yb = accessv( false, false, ix, iy, QG3, true, d0cb, cb, yb, Grid );
@@ -168,6 +169,7 @@ taylorx_contrib( const struct Grid_coeffs Grid ,
     const double ddg1bdydy = ddg3bdydy -(y*ddg2bdydy+2.0*dg2bdy)*cb/x;
     D -> ddg1dydy = ax*ddg1adydy + (1.0-ax)*ddg1bdydy;
   }
+
   return 0 ; 
 }
 
@@ -175,32 +177,17 @@ taylorx_contrib( const struct Grid_coeffs Grid ,
 static struct vtmp
 v_flip2( const struct vtmp D )
 {
-  struct vtmp F ;
-  F.g2     = -D.g2 ;
-  F.dg1dx  = +D.dg1dx ;
-  F.dg1dy  = +D.dg1dy ;
-  F.dg1dcb = +D.dg1dcb ;
-  F.dg2dx  = -D.dg2dx ;
-  F.dg2dy  = -D.dg2dy ;
-  F.dg2dcb = -D.dg2dcb ;
-  F.dg3dx  = +D.dg3dx ;
-  F.dg3dy  = +D.dg3dy ;
-  F.dg3dcb = +D.dg3dcb ;
-  F.ddg1dxdx   = +D.ddg1dxdx ;
-  F.ddg1dxdy   = +D.ddg1dxdy ;
-  F.ddg1dxdcb  = +D.ddg1dxdcb ;
-  F.ddg1dydcb  = +D.ddg1dydcb ;
-  F.ddg1dcbdcb = +D.ddg1dcbdcb ;
+  struct vtmp F = D ; // memcpy
+  F.g2         = -D.g2 ;
+  F.dg2dx      = -D.dg2dx ;
+  F.dg2dy      = -D.dg2dy ;
+  F.dg2dcb     = -D.dg2dcb ;
   F.ddg2dxdx   = -D.ddg2dxdx ;
   F.ddg2dxdy   = -D.ddg2dxdy ;
+  F.ddg2dydy   = -D.ddg2dydy ;
   F.ddg2dxdcb  = -D.ddg2dxdcb ;
   F.ddg2dydcb  = -D.ddg2dydcb ;
-  F.ddg2dcbdcb = -D.ddg2dcbdcb ;
-  F.ddg3dxdx   = +D.ddg3dxdx ;
-  F.ddg3dxdy   = +D.ddg3dxdy ;
-  F.ddg3dxdcb  = +D.ddg3dxdcb ;
-  F.ddg3dydcb  = +D.ddg3dydcb ;
-  F.ddg3dcbdcb = +D.ddg3dcbdcb ;
+  F.ddg2dcbdcb = -D.ddg2dcbdcb ;  
   return F ;
 }
 
@@ -380,11 +367,7 @@ chnr_dV( const double xv[4] ,
 	 const struct AVX_precomps *PC ,
 	 double dv[4][4][4] )
 {
-  struct vtmp D ;
-
-  // needed for gcc 4.8's incorrect maybe initialised flag
-  D.dg3dx = D.dg3dy = D.dg3dcb = D.ddg3dxdx = D.ddg3dxdy = 0. ;
-  D.ddg3dxdcb = D.ddg3dcbdcb = D.ddg3dydcb = 0. ;
+  struct vtmp D = {} ; // zero this guy
 
   if( Inv.x < Grid.XX[0] ) {
     // if this messes up we leave
@@ -459,7 +442,6 @@ chnr_dV( const double xv[4] ,
       - Inv.y/Inv.x*Inv.cb*D.ddg2dcbdcb;
       
     if( Inv.flag2 ) {
-      
       // in case of swap, you need the second derivative wrt y
       const int iy1 = bsrch( Grid.YY , Inv.y , 0 , Grid.nstpy ) ;
 

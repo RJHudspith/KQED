@@ -65,12 +65,12 @@ interpol4( const struct intprecomp INVx ,
   return (f1*INVx.A + f2*INVx.B + g1*INVx.C1 + g2*INVx.C2)*INVx.D ; 
 }
 
+#if (defined HAVE_IMMINTRIN_H) && (defined __AVX__)
 static inline void
 interpol5( double F[4] ,
 	   const struct intprecomp INVx ,
 	   const double f[16] )
 {
-#if (defined HAVE_IMMINTRIN_H) && (defined __AVX__)
   register const __m256d YMM0 = _mm256_setr_pd( f[8]  , f[3] , f[4] , f[0] ) ;
   register const __m256d YMM1 = _mm256_setr_pd( f[9]  , f[2] , f[5] , f[1] ) ;
   register const __m256d YMM2 = _mm256_setr_pd( f[10] , f[3] , f[6] , f[2] ) ;
@@ -87,13 +87,8 @@ interpol5( double F[4] ,
   *Y = _mm256_add_pd( _mm256_mul_pd( YMM3 , INVx.c2 ) , *Y ) ;
   #endif
   *Y = _mm256_mul_pd( *Y , INVx.d ) ;
-#else
-  F[0] = (f[8]*INVx.A + f[9]*INVx.B  + f[10]*INVx.C1 + f[11]*INVx.C2)*INVx.D ;
-  F[1] = (f[3]*1      + f[2]*INVx.lA - f[3]*INVx.lA  + 0 ) ;
-  F[2] = (f[4]*INVx.A + f[5]*INVx.B  + f[6]*INVx.C1  + f[7]*INVx.C2)*INVx.D ;
-  F[3] = (f[0]*INVx.A + f[1]*INVx.B  + f[2]*INVx.C1  + f[3]*INVx.C2)*INVx.D ;
-#endif
 }
+#endif
 
 // function pointer for cheby stuff
 static double (*Func_usm[4])( const int , const double , const double *) = \

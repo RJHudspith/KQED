@@ -8,11 +8,9 @@ The library is built with gnu automake, so the typical behaviour is:
 
     ./configure CC=gcc CFLAGS="-O3 -Wall -fopenmp -mavx -mfma" --prefix={path to install dir}
 
-The code has been checked (compiles without warning under -Wall -Wpedantic) with icc-2018, clang-6, gcc-7.4, and gcc-8.1.
+The code has been checked (compiles without warning under -Wall -Wpedantic) with icc-2018, clang-6, clang-14, gcc-7.4, gcc-8.1, and gcc-11.2. Currently the clang-compiled and the intel-compiled codes run faster.
 
 If using icc I recommend the flag -xHOST instead of -mavx -mfma. The compiler will probably tell you as much. In general I recommend using the icc compiler where available. I strongly recommend building with AVX/FMA if possible as it is significantly faster, likewise with OpenMP.
-
-The linker will fail if the -flto option is used as a compilation flag with clang-6. This appears to be clang's problem, as the linker works when the code is compiled without this flag.
 
 The code compiles without warning under clang's static analyzer (scan-build), and is memory-leak free according to valgrind.
 

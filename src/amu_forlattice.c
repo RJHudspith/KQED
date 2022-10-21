@@ -1235,8 +1235,8 @@ example22( const struct QED_kernel_temps t )
 {
   printbar() ;
   fprintf( stdout , "Testing for thread safety\n" ) ;
-  const double x[4] = { 1 , 2 , 3 , 4 }, y[4] = { 1 , 2 , 2 , 2 } ; 
 #if (defined HAVE_OMP_H)
+  const double x[4] = { 1 , 2 , 3 , 4 }, y[4] = { 1 , 2 , 2 , 2 } ; 
 #pragma omp parallel
   {
     char str[64] ;

@@ -20,7 +20,7 @@ v4norm( const double *x )
 static inline int
 kro( const int mu , const int nu )
 {
-  return (mu==nu) ;//(mu != nu) ? 0 : 1 ;
+  return (mu==nu) ;
 }
 
 // lexicographical order for G8
