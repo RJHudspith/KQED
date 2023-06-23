@@ -444,77 +444,11 @@ init_STV( const double xv[4] ,
     ix2 = ix1 ;
   }
 
-#if (defined HAVE_IMMINTRIN_H) && (defined __AVX__)
-
-  const size_t thread = (size_t)omp_get_thread_num() ;
-  const size_t toff = t.Grid.Nffa*thread ;
-  
-  const size_t nx1 = (size_t)t.Grid.nfx[ix1];
-  const size_t nx2 = (size_t)t.Grid.nfx[ix2];
-  const size_t nmin = (size_t)((nx1<nx2)?nx1:nx2);
-
-  // y edge case
-  const size_t iy1 = Inv.INVy.idx ;
-  size_t iy2 = iy1 + 1 ;
-  if( iy2 >= (size_t)t.Grid.nstpy ) {
-    iy2 = iy1 ;
-  }
- 
-  size_t i ;
-  for( i = 0 ; i < (size_t)t.Grid.Nffa ; i++ ) {
-    
-    t.Grid.PC[i+toff].nmax = (nx1<nx2)?nx2:nx1 ;
-    
-    const float *Fm1 = t.Grid.Ffm[i][ix1][iy1] ;
-    const float *Fm2 = t.Grid.Ffm[i][ix1][iy2] ;
-    const float *Fm3 = t.Grid.Ffm[i][ix2][iy1] ;
-    const float *Fm4 = t.Grid.Ffm[i][ix2][iy2] ;
-    const float *Fp1 = t.Grid.Ffp[i][ix1][iy1] ;
-    const float *Fp2 = t.Grid.Ffp[i][ix1][iy2] ;
-    const float *Fp3 = t.Grid.Ffp[i][ix2][iy1] ;
-    const float *Fp4 = t.Grid.Ffp[i][ix2][iy2] ;
-
-    __m256d *pFm = (__m256d*)t.Grid.PC[i+toff].Fm ;
-    __m256d *pFp = (__m256d*)t.Grid.PC[i+toff].Fp ;
-    
-    size_t j ;
-    for( j = 0 ; j < nmin ; j++ ) {
-      pFm[j] = _mm256_setr_pd( *Fm1 , *Fm2 , *Fm3 , *Fm4 ) ;
-      pFp[j] = _mm256_setr_pd( *Fp1 , *Fp2 , *Fp3 , *Fp4 ) ;
-      Fm1++ ; Fm2++ ; Fm3++ ; Fm4++ ;
-      Fp1++ ; Fp2++ ; Fp3++ ; Fp4++ ;	   
-    }
-    if( nx1 < nx2) {
-      for( ; j < nx2 ; j++ ) {
-	pFm[j] = _mm256_setr_pd( 0 , 0 , *Fm3 , *Fm4 ) ;
-	pFp[j] = _mm256_setr_pd( 0 , 0 , *Fp3 , *Fp4 ) ;
-	Fm3++ ; Fm4++ ;
-	Fp3++ ; Fp4++ ;    
-      }
-    } else {
-      for( ; j < nx1 ; j++ ) {
-	pFm[j] = _mm256_setr_pd( *Fm1 , *Fm2 , 0 , 0 ) ;
-	pFp[j] = _mm256_setr_pd( *Fp1 , *Fp2 , 0 , 0 ) ;
-	Fm1++ ; Fm2++ ;
-	Fp1++ ; Fp2++ ;	
-      }
-    }
-  }
-
-  if( chnr_dS( xv, yv, Inv, t.Grid, t.Grid.PC+toff, k->Sxv, k->Syv ) ||
-      chnr_dT( xv, yv, Inv, t.Grid, t.Grid.PC+toff, k->Txv, k->Tyv ) ||
-      chnr_dV( xv, yv, Inv, t.Grid, t.Grid.PC+toff, k->Vv ) ) {
-    return 1 ;
-  }
-  
-#else
-
   if( chnr_dS( xv, yv, Inv, t.Grid, t.Grid.PC, k->Sxv, k->Syv ) ||
       chnr_dT( xv, yv, Inv, t.Grid, t.Grid.PC, k->Txv, k->Tyv ) ||
       chnr_dV( xv, yv, Inv, t.Grid, t.Grid.PC, k->Vv ) ) {
     return 1 ;
   }
-#endif
 
   return 0 ;
 }
