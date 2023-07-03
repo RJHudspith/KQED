@@ -12,7 +12,7 @@ LIBFILES=./LIBFILES/all_kernels.c \
 	./LIBFILES/getff-new.c ./LIBFILES/init.c \
 	./LIBFILES/io.c ./LIBFILES/kernels.c ./LIBFILES/pi_pert.c \
 	./LIBFILES/QED_kernel.c ./LIBFILES/QED_kernel_xy0.c \
-	./LIBFILES/simd.c ./LIBFILES/SYMXY.c ./LIBFILES/SYMXY0.c \
+	./LIBFILES/SYMXY.c ./LIBFILES/SYMXY0.c \
 	./LIBFILES/Tabd.c \
         ./LIBFILES/sub_kernel.c
 

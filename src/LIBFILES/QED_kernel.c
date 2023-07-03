@@ -9,7 +9,6 @@
 #include "corr_malloc.h"
 
 #include "getff-new.h" // set_invariants()
-#include "simd.h"
 
 // hand-unrolled direct evaluation of the kernel
 static void
