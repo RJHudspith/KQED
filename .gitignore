@@ -1,0 +1,23 @@
+# make files
+*.o
+*.a
+config.h
+config.h.in
+build/
+.deps/
+.dirstamp
+# automake files
+autom4te.cache/
+Makefile
+Makefile.in
+aclocal.m4
+ar-lib
+compile
+configure
+depcomp
+install-sh
+missing
+stamp-h1
+# configure files
+config.log
+config.status
