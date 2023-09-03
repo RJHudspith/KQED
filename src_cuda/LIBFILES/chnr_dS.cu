@@ -11,7 +11,7 @@ compute_dg_TAYLORX( double *dg0dy ,
 		    const struct invariants Inv ,
 		    const struct Grid_coeffs Grid )
 {  
-  const int iy_tay = find_ind( Grid.TX[ YY ] , Inv.y , 0 , Grid.NY_tay ) ;
+  const int iy_tay = find_ind( getTX(&Grid,YY) , Inv.y , 0 , Grid.NY_tay ) ;
   const int iy = find_ind( Grid.YY , Inv.y , 0 , Grid.nstpy ) ;
   
   if( iy_tay == Grid.NY_tay-1 || iy == Grid.nstpy-1 ) {
@@ -21,15 +21,15 @@ compute_dg_TAYLORX( double *dg0dy ,
   const int iy2_tay = iy_tay+1;
   const int ix  = 0;
   
-  const double ay = (Grid.TX[YY][iy2_tay]-Inv.y)
-    /(Grid.TX[YY][iy2_tay]-Grid.TX[YY][iy_tay]);
+  const double ay = (getTX(&Grid,YY)[iy2_tay]-Inv.y)
+    /(getTX(&Grid,YY)[iy2_tay]-getTX(&Grid,YY)[iy_tay]);
   const double ax = ( Grid.XX[0]-Inv.x)/( Grid.XX[0]);
   
-  double f1 = Inv.cb*lerp( ay , Grid.TX[G0dx][iy_tay] , Grid.TX[G0dx][iy2_tay] ) ;  
+  double f1 = Inv.cb*lerp( ay , getTX(&Grid,G0dx)[iy_tay] , getTX(&Grid,G0dx)[iy2_tay] ) ;  
   double f2 = accessv( false, true, ix, iy, dxQG0, false, d0cb, Inv.cb, Inv.y, Grid );
   *dg0dx = lerp( ax , f1 , f2 ) ;
 
-  f1 = lerp( ay , Grid.TX[ G0dy ][iy_tay] , Grid.TX[ G0dy ][iy2_tay ] ) ;
+  f1 = lerp( ay , getTX(&Grid,G0dy)[iy_tay] , getTX(&Grid,G0dy)[iy2_tay ] ) ;
   f2 = accessv( false, false, ix, iy, QG0, true , d0cb, Inv.cb, Inv.y, Grid );
   *dg0dy = lerp( ax , f1 , f2 ) ;
     
@@ -60,7 +60,7 @@ chnr_dS( const double xv[4] ,
     return 1 ;
   } else { 
     double f[4] KQED_ALIGN ;
-    extractff2( QG0 , d0cb, Inv, Grid , PC , f );
+    extractff2( QG0 , d0cb, Inv, Grid , f );
     dg0dcb = f[0] ;
     dg0dx  = f[1] ;
     dg0dy  = f[2] ;

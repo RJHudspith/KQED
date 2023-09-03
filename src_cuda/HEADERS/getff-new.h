@@ -22,15 +22,13 @@ __device__
 double
 extractff( const FFidx nm, const bool ndy, const NDCB ndcb ,
 	   const struct invariants Inv ,
-	   const struct Grid_coeffs Grid ,
-	   const struct AVX_precomps *PC ) ;
+	   const struct Grid_coeffs Grid ) ;
 
 __device__
 void
 extractff2( const FFidx nm, const NDCB ndcb ,
 	    const struct invariants Inv ,
 	    const struct Grid_coeffs Grid ,
-	    const struct AVX_precomps *PC ,
 	    double f[4] ) ;
 
 // little helper function

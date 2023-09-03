@@ -23,36 +23,36 @@ TAYLORX_contribution( struct ttmps *T ,
   const double ysq = Inv.flag2 ? Inv.xmysq : Inv.ysq ;
   
   // set the indices
-  const int iy_tay  = find_ind( Grid.TX[ YY ] , Inv.y , 0 , Grid.NY_tay ) ;      
+  const int iy_tay  = find_ind( getTX(&Grid,YY) , Inv.y , 0 , Grid.NY_tay ) ;      
   const int iy = find_ind( Grid.YY , Inv.y , 0 , Grid.nstpy ) ;
 
   // check they are reasonable
   if( iy_tay == Grid.NY_tay-1 || iy == Grid.nstpy-1 ) {
-    fprintf( stderr , "chnr_dT TAYLORX y is at or above edge of grid\n" ) ;
-    fprintf( stderr , "%f >= %f\n" , Inv.y , Grid.TX[YY][iy_tay] ) ;
-    fprintf( stderr , "%f >= %f\n" , Inv.y , Grid.YY[Grid.nstpy-1] ) ;
+    // fprintf( stderr , "chnr_dT TAYLORX y is at or above edge of grid\n" ) ;
+    // fprintf( stderr , "%f >= %f\n" , Inv.y , getTX(&Grid,YY)[iy_tay] ) ;
+    // fprintf( stderr , "%f >= %f\n" , Inv.y , Grid.YY[Grid.nstpy-1] ) ;
     return 1 ;
   }
 
   const int iy2_tay = iy_tay+1;
   const int ix = 0 ;
   
-  const double ay = (Grid.TX[ YY ][iy2_tay]-Inv.y)/
-    (Grid.TX[ YY ][iy2_tay]- Grid.TX[ YY ][iy_tay]);
+  const double ay = (getTX(&Grid,YY)[iy2_tay]-Inv.y)/
+    (getTX(&Grid,YY)[iy2_tay]- getTX(&Grid,YY)[iy_tay]);
   const double ax = (Grid.XX[0]-Inv.x)/(Grid.XX[0]);
   
   const double xb=Grid.XX[0];
   const double xbsq=xb*xb;
   
-  const double ell2a = lerp( ay , Grid.TX[ Gl2 ][iy_tay] , Grid.TX[ Gl2 ][iy2_tay] ) ;
+  const double ell2a = lerp( ay , getTX(&Grid,Gl2)[iy_tay] , getTX(&Grid,Gl2)[iy2_tay] ) ;
   const double ell2b = accessv(false, true, ix, iy, QL2, false, d0cb, Inv.cb, Inv.y, Grid );
   T -> ell2 = lerp(ax, ell2a, ell2b) ;
   
-  const double dell2adx = lerp( ay , Grid.TX[ Gl21 ][iy_tay] , Grid.TX[ Gl21 ][iy2_tay] )*Inv.cb ;
+  const double dell2adx = lerp( ay , getTX(&Grid,Gl21)[iy_tay] , getTX(&Grid,Gl21)[iy2_tay] )*Inv.cb ;
   const double dell2bdx = accessv(false, true, ix, iy, dxQL2, false, d0cb, Inv.cb, Inv.y , Grid );
   T -> dell2dx = lerp(ax, dell2adx, dell2bdx) ;
 
-  const double dell2ady = lerp( ay , Grid.TX[ Gl2dy ][iy_tay] , Grid.TX[ Gl2dy ][iy2_tay] ) ;
+  const double dell2ady = lerp( ay , getTX(&Grid,Gl2dy)[iy_tay] , getTX(&Grid,Gl2dy)[iy2_tay] ) ;
   const double dell2bdy = accessv(false, false, ix, iy, QL2 , true, d0cb, Inv.cb, Inv.y , Grid ) ;
   T -> dell2dy = lerp(ax, dell2ady, dell2bdy) ;
 
@@ -69,14 +69,14 @@ TAYLORX_contribution( struct ttmps *T ,
   const double dell4bdy  = accessv(false, false, ix, iy, QL4  , true , d0cb , Inv.cb, Inv.y , Grid );
   const double dell4bdcb = accessv(false, true , ix, iy, QL4  , false, d1cb , Inv.cb, Inv.y , Grid );
   
-  const double ell3a = lerp( ay , Grid.TX[ Gl3 ][iy_tay] , Grid.TX[ Gl3 ][iy2_tay] ) ;
+  const double ell3a = lerp( ay , getTX(&Grid,Gl3)[iy_tay] , getTX(&Grid,Gl3)[iy2_tay] ) ;
   const double ell3b = ell4b/(2.0*xbsq*ysq) - Inv.y*Inv.cb*ell2b/xb;
   T -> ell3 = lerp( ax , ell3a , ell3b ) ;
 
   const double ell1b = 4.0/(3.0*xbsq*xbsq)*(v1b - xbsq*ysq*(Inv.cb*Inv.cb-0.25)*ell2b - 1.5*xbsq*xb*Inv.y*Inv.cb*ell3b);
   T -> ell1 = ell1b;
 
-  const double dell3ady = lerp( ay , Grid.TX[ Gl3dy ][iy_tay] , Grid.TX[ Gl3dy ][iy2_tay] ) ;
+  const double dell3ady = lerp( ay , getTX(&Grid,Gl3dy)[iy_tay] , getTX(&Grid,Gl3dy)[iy2_tay] ) ;
   const double dell3bdy = (-ell4b/(ysq*Inv.y)
 			   + dell4bdy/(2.0*ysq)
 			   - Inv.cb*xb*ell2b
@@ -170,19 +170,19 @@ chnr_dT( const double xv[4] ,
     return 1 ;
   } else {
     double f[4] KQED_ALIGN ;
-    extractff2( QL2 , d0cb , Inv , Grid , PC , f ) ;
+    extractff2( QL2 , d0cb , Inv , Grid , f ) ;
     T.dell2dx  = f[1] ;
     T.dell2dy  = f[2] ;
     T.ell2     = f[3] ;
     T.dell2dcb = f[0] ;
 
-    extractff2( QL4 , d0cb , Inv , Grid , PC , f ) ;
+    extractff2( QL4 , d0cb , Inv , Grid , f ) ;
     T.dell4dx  = f[1] ;
     T.dell4dy  = f[2] ;
     T.ell4     = f[3] ;
     T.dell4dcb = f[0] ; 
     
-    extractff2( QG1 , d0cb , Inv , Grid , PC , f ) ;
+    extractff2( QG1 , d0cb , Inv , Grid , f ) ;
     T.dv1dx  = f[1] ;
     T.dv1dy  = f[2] ;
     T.v1     = f[3] ;

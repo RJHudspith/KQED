@@ -220,7 +220,7 @@ AC_ARG_WITH([target-gpu-arch],
 AC_MSG_NOTICE([target gpu architecture is sm$target_arch])
 
 # Default nvcc flags
-NVCCFLAGS=" -ccbin $CXX"
+NVCCFLAGS=" -ccbin $CC"
 NVCCFLAGS+=" --gpu-architecture=sm_$target_arch"
 NVCCFLAGS+=" -gencode=arch=compute_$target_arch,code=compute_$target_arch"
 

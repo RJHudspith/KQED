@@ -4,20 +4,20 @@ BUILDDIR=@top_builddir@
 lib_LIBRARIES = libKQED_cuda.a
 
 ## just include the header directory
-AM_CFLAGS=-I${TOPDIR}/src/HEADERS/
+AM_CFLAGS=-I${TOPDIR}/src_cuda/HEADERS/
+INCLUDES=-I./HEADERS/
 
-LIBFILES=./LIBFILES/all_kernels.c \
-	./LIBFILES/cheby.c ./LIBFILES/chnr_dV.c ./LIBFILES/chnr_dS.c \
-	./LIBFILES/chnr_dT.c ./LIBFILES/con_kernel.c \
-	./LIBFILES/getff-new.c ./LIBFILES/init.c \
-	./LIBFILES/io.c ./LIBFILES/kernels.c ./LIBFILES/pi_pert.c \
-	./LIBFILES/QED_kernel.c ./LIBFILES/QED_kernel_xy0.c \
-	./LIBFILES/SYMXY.c ./LIBFILES/SYMXY0.c \
-	./LIBFILES/Tabd.c \
-        ./LIBFILES/sub_kernel.c
+LIBFILES=./LIBFILES/all_kernels.cu \
+	./LIBFILES/cheby.cu ./LIBFILES/chnr_dV.cu ./LIBFILES/chnr_dS.cu \
+	./LIBFILES/chnr_dT.cu ./LIBFILES/con_kernel.cu \
+	./LIBFILES/getff-new.cu ./LIBFILES/init.cu \
+	./LIBFILES/io.cu ./LIBFILES/kernels.cu ./LIBFILES/pi_pert.cu \
+	./LIBFILES/QED_kernel.cu ./LIBFILES/QED_kernel_xy0.cu \
+	./LIBFILES/SYMXY.cu ./LIBFILES/SYMXY0.cu \
+	./LIBFILES/Tabd.cu \
+        ./LIBFILES/sub_kernel.cu
 
-UTILSFILES=./UTILS/GLU_timer.c ./UTILS/GLU_bswap.c ./UTILS/crc32c.c \
-	./UTILS/corr_malloc.c
+UTILSFILES=./UTILS/GLU_timer.c ./UTILS/GLU_bswap.c ./UTILS/crc32c.c
 
 ## all the source files apart from amu_forlattice.c
 libKQED_cuda_a_SOURCES = \
@@ -25,10 +25,10 @@ libKQED_cuda_a_SOURCES = \
 	${UTILSFILES}
 libKQED_cuda_a_AR = $(NVCC) $(NVCCFLAGS) -lib -o
 libKQED_cuda_a_LIBADD = $(CUDA_LIBS)
-libKQED_cuda_a_CFLAGS = $(CUDA_CFLAGS)
+libKQED_cuda_a_CFLAGS = $(CUDA_CFLAGS) $(INCLUDES) $(CFLAGS)
 
 .cu.o:
-	$(NVCC) $(NVCCFLAGS) -dc -o $@ $<
+	$(NVCC) $(NVCCFLAGS) $(INCLUDES) $(DEFS) $(DEFAULT_INCLUDES) $(CFLAGS) $(CPPFLAGS) -dc -o $@ $<
 
 ## and their respective headers
 include_HEADERS = \

@@ -25,7 +25,7 @@ taylorx_contrib( const struct Grid_coeffs Grid ,
 		 const bool flag2 ,
 		 double cb )
 { 
-  const int iy_tay  = find_ind( Grid.TX[ YY ] , y , 0 , Grid.NY_tay ) ;
+  const int iy_tay  = find_ind( getTX(&Grid, YY) , y , 0 , Grid.NY_tay ) ;
   const int iy = find_ind( Grid.YY , y , 0 , Grid.nstpy ) ;
   
   if( iy_tay == Grid.NY_tay-1 || iy == Grid.nstpy-1 ) {
@@ -35,7 +35,7 @@ taylorx_contrib( const struct Grid_coeffs Grid ,
   const int iy2_tay = iy_tay+1;
   const int ix=0;
   
-  const double ay = (Grid.TX[ YY ][iy2_tay]-y)/(Grid.TX[YY][iy2_tay]-Grid.TX[YY][iy_tay]);
+  const double ay = (getTX(&Grid,YY)[iy2_tay]-y)/(getTX(&Grid,YY)[iy2_tay]-getTX(&Grid,YY)[iy_tay]);
   const double ax = (Grid.XX[0]-x)/(Grid.XX[0]);
 
   const double xb=Grid.XX[0] ;
@@ -45,7 +45,7 @@ taylorx_contrib( const struct Grid_coeffs Grid ,
   const double g2b = accessv( false, true, ix, iy, QG2 , false, d0cb, cb, y, Grid );
   D -> g2 = lerp( ax , g2a , g2b ) ;
 
-  const double ddg2adxdcb = lerp( ay , Grid.TX[ G21 ][iy_tay] , Grid.TX[ G21 ][iy2_tay] ) ;
+  const double ddg2adxdcb = lerp( ay , getTX(&Grid,G21)[iy_tay] , getTX(&Grid,G21)[iy2_tay] ) ;
   const double ddg2bdxdcb = accessv( false, true, ix, iy, dxQG2, false, d1cb, cb, y, Grid );
   D -> ddg2dxdcb = lerp( ax , ddg2adxdcb , ddg2bdxdcb ) ;
 
@@ -58,12 +58,12 @@ taylorx_contrib( const struct Grid_coeffs Grid ,
   const double dg2bdy = accessv( false, false, ix, iy, QG2, true, d0cb, cb, y , Grid );
   D -> dg2dy = lerp( ax , 0.0 , dg2bdy ) ;
 
-  const double ddg2adxdy = cb*lerp( ay , Grid.TX[ G21dy ][iy_tay] , Grid.TX[ G21dy ][iy2_tay] ) ;
+  const double ddg2adxdy = cb*lerp( ay , getTX(&Grid,G21dy)[iy_tay] , getTX(&Grid,G21dy)[iy2_tay] ) ;
   const double ddg2bdxdy = accessv( false, false, ix, iy, dxQG2, true, d0cb, cb, y , Grid );
   D -> ddg2dxdy = lerp( ax , ddg2adxdy , ddg2bdxdy ) ;
 
-  const double ddg2adxdx = 2.0*( lerp( ay , Grid.TX[ G22A ][iy_tay] , Grid.TX[ G22A ][iy2_tay] ) 
-				 + lerp( ay , Grid.TX[ G22B ][iy_tay] , Grid.TX[ G22B ][iy2_tay] )
+  const double ddg2adxdx = 2.0*( lerp( ay , getTX(&Grid,G22A)[iy_tay] , getTX(&Grid,G22A)[iy2_tay] ) 
+				 + lerp( ay , getTX(&Grid,G22B)[iy_tay] , getTX(&Grid,G22B)[iy2_tay] )
 				 *(0.4+0.6*(2.0*cb*cb-1)));
   const double ddg2bdxdx = accessv( false, true , ix, iy, d2xQG2, false, d0cb, cb, y , Grid );
   D -> ddg2dxdx = lerp( ax , ddg2adxdx , ddg2bdxdx ) ;
@@ -89,17 +89,17 @@ taylorx_contrib( const struct Grid_coeffs Grid ,
   const double ddg1bdydcb = ddg3bdydcb - g2b/xb -cb/xb*dg2bdcb -y/xb*dg2bdy - y/xb*cb*ddg2bdydcb;
   const double ddg1bdcbdcb = ddg3bdcbdcb - 2.0*y/xb*dg2bdcb - y/xb*cb*ddg2bdcbdcb;
     
-  const double dg1ady = lerp( ay , Grid.TX[ G3Ady ][iy_tay] , Grid.TX[ G3Ady ][iy2_tay] )
-    - lerp( ay , Grid.TX[ G3Bdy ][iy_tay] , Grid.TX[ G3Bdy ][iy2_tay] ) ;
+  const double dg1ady = lerp( ay , getTX(&Grid,G3Ady)[iy_tay] , getTX(&Grid,G3Ady)[iy2_tay] )
+    - lerp( ay , getTX(&Grid,G3Bdy)[iy_tay] , getTX(&Grid,G3Bdy)[iy2_tay] ) ;
   
-  const double ddg1adxdy = cb*( lerp( ay , Grid.TX[ G31Ady ][iy_tay] , Grid.TX[ G31Ady ][iy2_tay] )
-				-(2/3.)*lerp( ay , Grid.TX[ G31Bdy ][iy_tay] , Grid.TX[ G31Bdy ][iy2_tay] )
-				-lerp( ay , Grid.TX[ G22A ][iy_tay] , Grid.TX[ G22A ][iy2_tay] )
-				-y*lerp( ay , Grid.TX[ G22Ady ][iy_tay] , Grid.TX[ G22Ady ][iy2_tay] )) ;
+  const double ddg1adxdy = cb*( lerp( ay , getTX(&Grid,G31Ady)[iy_tay] , getTX(&Grid,G31Ady)[iy2_tay] )
+				-(2/3.)*lerp( ay , getTX(&Grid,G31Bdy)[iy_tay] , getTX(&Grid,G31Bdy)[iy2_tay] )
+				-lerp( ay , getTX(&Grid,G22A)[iy_tay] , getTX(&Grid,G22A)[iy2_tay] )
+				-y*lerp( ay , getTX(&Grid,G22Ady)[iy_tay] , getTX(&Grid,G22Ady)[iy2_tay] )) ;
   const double ddg1adxdcb =
-    lerp( ay , Grid.TX[ G31A ][iy_tay] , Grid.TX[ G31A ][iy2_tay] )
-    -(2/3.)*lerp( ay , Grid.TX[ G31B ][iy_tay] , Grid.TX[ G31B ][iy2_tay] )
-    -y*lerp( ay , Grid.TX[ G22A ][iy_tay] , Grid.TX[ G22A ][iy2_tay] ) ;
+    lerp( ay , getTX(&Grid,G31A)[iy_tay] , getTX(&Grid,G31A)[iy2_tay] )
+    -(2/3.)*lerp( ay , getTX(&Grid,G31B)[iy_tay] , getTX(&Grid,G31B)[iy2_tay] )
+    -y*lerp( ay , getTX(&Grid,G22A)[iy_tay] , getTX(&Grid,G22A)[iy2_tay] ) ;
 
   const double ddg1adxdx = ddg1bdxdx; 
   D -> ddg1dxdcb  = lerp( ax , ddg1adxdcb , ddg1bdxdcb ) ;
@@ -122,8 +122,8 @@ taylorx_contrib( const struct Grid_coeffs Grid ,
     const double ddg2bdydy = (dg2bdy_yb-dg2bdy_ya)/Grid.ystp;
     D -> ddg2dydy = ax*ddg2adydy + (1.0-ax)*ddg2bdydy;
        
-    const double ddg1adydy = (Grid.TX[ G3Ady ][iy2_tay]- Grid.TX[ G3Bdy ][iy2_tay]-\
-			      ( Grid.TX[ G3Ady ][iy_tay]- Grid.TX[ G3Bdy ][iy_tay]))/(Grid.TX[YY][iy2_tay] - Grid.TX[YY][iy_tay] ) ;
+    const double ddg1adydy = (getTX(&Grid,G3Ady)[iy2_tay]- getTX(&Grid,G3Bdy)[iy2_tay]-\
+			      ( getTX(&Grid,G3Ady)[iy_tay]- getTX(&Grid,G3Bdy)[iy_tay]))/(getTX(&Grid,YY)[iy2_tay] - getTX(&Grid,YY)[iy_tay] ) ;
 
     const double dg3bdy_ya = accessv( false, false, ix, iy, QG3, true, d0cb, cb, ya, Grid );
     const double dg3bdy_yb = accessv( false, false, ix, iy, QG3, true, d0cb, cb, yb, Grid );
@@ -346,32 +346,32 @@ chnr_dV( const double xv[4] ,
   } else {
 
     // this one is all on its own and that is sad
-    D.dg3dy = extractff( QG3   , true , d0cb, Inv, Grid , PC );
+    D.dg3dy = extractff( QG3   , true , d0cb, Inv, Grid );
     
     // use the new extract code
     double f[4] KQED_ALIGN ;
-    extractff2( QG2 , d0cb , Inv , Grid , PC , f ) ;
+    extractff2( QG2 , d0cb , Inv , Grid , f ) ;
     D.g2    = f[3] ;
     D.dg2dy = f[2] ;
 
-    extractff2( dxQG2 , d0cb , Inv , Grid , PC , f ) ;
+    extractff2( dxQG2 , d0cb , Inv , Grid , f ) ;
     D.ddg2dxdx  = f[1] ;
     D.dg2dx     = f[3] ;
     D.ddg2dxdy  = f[2] ;
     D.ddg2dxdcb = f[0] ;
 
-    extractff2( dxQG3 , d0cb , Inv , Grid , PC , f ) ;
+    extractff2( dxQG3 , d0cb , Inv , Grid , f ) ;
     D.ddg3dxdx  = f[1] ;
     D.dg3dx     = f[3] ;
     D.ddg3dxdy  = f[2] ;
     D.ddg3dxdcb = f[0] ;
     
-    extractff2( QG2 , d1cb , Inv , Grid , PC , f ) ;
+    extractff2( QG2 , d1cb , Inv , Grid , f ) ;
     D.dg2dcb     = f[3] ;
     D.ddg2dydcb  = f[2] ;
     D.ddg2dcbdcb = f[0] ;
 
-    extractff2( QG3 , d1cb , Inv , Grid , PC , f ) ;
+    extractff2( QG3 , d1cb , Inv , Grid , f ) ;
     D.dg3dcb     = f[3] ;
     D.ddg3dydcb  = f[2] ;
     D.ddg3dcbdcb = f[0] ;
@@ -419,12 +419,12 @@ chnr_dV( const double xv[4] ,
       Inv1.y = Grid.YY[iy1] ;
       Inv2.y = Grid.YY[iy1+1] ;
       
-      double fq1 = extractff( QG2, true, d0cb, Inv1, Grid, PC );
-      double fq2 = extractff( QG2, true, d0cb, Inv2, Grid, PC );
+      double fq1 = extractff( QG2, true, d0cb, Inv1, Grid );
+      double fq2 = extractff( QG2, true, d0cb, Inv2, Grid );
       D.ddg2dydy = (fq2-fq1)/Grid.ystp;
       
-      fq1 = extractff( QG3, true, d0cb, Inv1, Grid , PC );
-      fq2 = extractff( QG3, true, d0cb, Inv2, Grid , PC );
+      fq1 = extractff( QG3, true, d0cb, Inv1, Grid );
+      fq2 = extractff( QG3, true, d0cb, Inv2, Grid );
       const double ddg3dydy = (fq2-fq1)/Grid.ystp; 
       D.ddg1dydy = ddg3dydy -(Inv.y*D.ddg2dydy+2.0*D.dg2dy)*Inv.cb/Inv.x;
     }

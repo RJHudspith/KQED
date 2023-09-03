@@ -87,6 +87,7 @@ static double Func_usm( const int i,
 // nm = index of the sum sigma that appeared in the integrand == outer index of ff
 // ndy and ndcb = # derivatives with respect to y and cos(beta) respectively
 // x is not used in this function
+__device__
 static void
 getff2( double res[2] ,
 	const int nf, const FFidx nm ,
@@ -115,11 +116,13 @@ getff2( double res[2] ,
   const int mm = abs( mshp ) ;
 
   // set fval to zero, actually not really needed
-  double fval[ nf+mm ] , fvalD[ nf+mm ] ;
+  double fval[128], fvalD[128];
+  // TODO: do something more reasonable if too long
+  if (nf+mm >= 128) return;
   memset( fval , 0 , (nf+mm)*sizeof( double ) ) ;
   memset( fvalD , 0 , (nf+mm)*sizeof( double ) ) ;
-  register double facm = y1*y1*yp ;
-  register double facp = yp ;
+  double facm = y1*y1*yp ;
+  double facp = yp ;
 
   int j ;
   for( j = 0 ; j < mm ; j++ ) {
@@ -140,6 +143,8 @@ getff2( double res[2] ,
 
   res[1] = Func_usm(mm + ndcb, nf+mm, x , fvalD ) ;
   res[0] = ndy? res[1] : Func_usm(mm + ndcb, nf+mm, x , fval ) ;
+  free( fval );
+  free( fvalD );
 }
 
 // case where you have read in the weight functions upon initialization
@@ -158,7 +163,7 @@ accessv( const bool flag_hy, const bool use_y_derivs,
     
   // occasionally ndy gets set to 1, if use_y_derivs is set we always do the deriv
   getff2( res1 , nx, nm, ndy, ndcb, y1, cb,
-	  Grid.Ffm[nm][ix][iy] , Grid.Ffp[nm][ix][iy] ) ;
+	  getFfm(&Grid, nm, ix, iy) , getFfp(&Grid, nm, ix, iy) ) ;
   
   // if we are not at the upper limit of Y we can use info from the next point
   if(!flag_hy) {
@@ -167,8 +172,8 @@ accessv( const bool flag_hy, const bool use_y_derivs,
     double res2[2] = {0.,0.} ;
 
     getff2( res2 , nx, nm, ndy, ndcb, y2, cb,
-	    Grid.Ffm[nm][ix][iy2] ,
-	    Grid.Ffp[nm][ix][iy2] ) ;
+	    getFfm(&Grid, nm, ix, iy2) ,
+	    getFfp(&Grid, nm, ix, iy2) ) ;
     
     if( use_y_derivs ) {
       return interpol3( y, y1, y2, y1-y2,
@@ -191,7 +196,7 @@ bsrch( const double *arr , const double target ,
 {
   // when hi == lo we are done
   if( ( hi - lo ) < 2 ) return lo ;
-  register const int mid = ( hi + lo )/2 ;
+  const int mid = ( hi + lo )/2 ;
   if( arr[mid] > target ) {
     return bsrch( arr , target , lo , mid ) ;
   } else {
@@ -226,10 +231,10 @@ find_ind(const double *arr, const double target,
 }
 
 // extract the form factor
+__device__
 double
 extractff( const FFidx nm, const bool ndy, const NDCB ndcb,
-	   const struct invariants Inv , const struct Grid_coeffs Grid ,
-	   const struct AVX_precomps *PC )
+	   const struct invariants Inv , const struct Grid_coeffs Grid )
 {  
   const bool flag_hx = ( Inv.x >= Grid.XX[ Grid.nstpx-1 ] ) ;
   const bool flag_hy = ( Inv.y >= Grid.YY[ Grid.nstpy-1 ] ) ;
@@ -246,9 +251,10 @@ extractff( const FFidx nm, const bool ndy, const NDCB ndcb,
 				 ndy, ndcb, Inv.cb, Inv.y , Grid ) ;
     if(use_x_derivs) {
       const int offset = nm < dxQG0 ? dxQG0 : QL4 ;
-      const double g1iy = accessv( flag_hy, use_y_derivs, ix, iy, nm+offset,
+      // These enum additions are pretty sketchy...
+      const double g1iy = accessv( flag_hy, use_y_derivs, ix, iy, (FFidx)(nm+offset),
 				   ndy, ndcb, Inv.cb, Inv.y, Grid ) ;
-      const double g2iy = accessv( flag_hy, use_y_derivs, ix+1, iy, nm+offset,
+      const double g2iy = accessv( flag_hy, use_y_derivs, ix+1, iy, (FFidx)(nm+offset),
 				   ndy, ndcb, Inv.cb, Inv.y, Grid ) ;
 
       return interpol4( Inv.INVx, f1iy, f2iy, g1iy, g2iy ) ;
@@ -261,28 +267,28 @@ extractff( const FFidx nm, const bool ndy, const NDCB ndcb,
 }
 
 // extract the form factor
+__device__
 void
 extractff2( const FFidx nm,
 	    const NDCB ndcb,
 	    const struct invariants Inv ,
 	    const struct Grid_coeffs Grid ,
-	    const struct AVX_precomps *PC ,
 	    double F[4] )
 {  
   // derivative map
-  const int ndcb2 = ndcb+1 < 5 ? ndcb+1 : ndcb ;
+  const NDCB ndcb2 = (NDCB)(ndcb+1 < 5 ? ndcb+1 : ndcb) ;
   // map for the x-derivative, incomplete as some derivatives aren't used
-  const int dxmap[14] = { dxQG0  , dxQG1 , dxQG2  , dxQG3  , dxQL4 , dxQL2 ,
+  const FFidx dxmap[14] = { dxQG0  , dxQG1 , dxQG2  , dxQG3  , dxQL4 , dxQL2 ,
 			  dxQG0  , dxQG1 , d2xQG2 , d2xQG3 , dxQL4 , dxQL2 ,
 			  d2xQG2 , d2xQG3 } ;
   // derivative wrt dcb
-  F[0] = extractff( nm, false , ndcb2 , Inv , Grid , PC ) ;
+  F[0] = extractff( nm, false , ndcb2 , Inv , Grid ) ;
   // derivative wrt x
-  F[1] = extractff( dxmap[nm], false , ndcb  , Inv , Grid , PC ) ;
+  F[1] = extractff( dxmap[nm], false , ndcb  , Inv , Grid ) ;
   // derivative wrt y
-  F[2] = extractff( nm, true  , ndcb  , Inv , Grid , PC ) ;
+  F[2] = extractff( nm, true  , ndcb  , Inv , Grid ) ;
   // no derivative
-  F[3] = extractff( nm, false , ndcb  , Inv , Grid , PC ) ;
+  F[3] = extractff( nm, false , ndcb  , Inv , Grid ) ;
   return ;
 }
 
