@@ -83,8 +83,11 @@ initialise( struct QED_kernel_temps *t )
     return 1 ;
   }
 
+  int *G8 = (int*)malloc(65536 * sizeof( int ) ) ;
+  init_g8( G8 );
   checkCudaErrors(cudaMalloc((void**)&t->G8, 65536 * sizeof( int ) )) ;
-  init_g8( t );
+  checkCudaErrors(cudaMemcpy(t->G8, G8, 65536 * sizeof( int ), cudaMemcpyHostToDevice )) ;
+  free( G8 );
 
 #ifdef VERBOSE
   fprintf( stdout , "|INIT| Set g-factors\n") ;

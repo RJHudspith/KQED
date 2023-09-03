@@ -34,7 +34,7 @@ compute_all_Mkernels_v2( const double M[4] ,
 			 const struct QED_kernel_temps t ,
 			 struct QED_Kernels *K ) ;
 
-__device__
+__device__  __host__
 void
 swap_munu_Lyx( struct QED_Kernels *K ) ;
 

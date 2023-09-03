@@ -8,11 +8,17 @@
 /**
    @fn void DML_checksum_accum_crc32c( uint32_t *checksuma , uint32_t *checksumb , const uint32_t rank , const void *buf , const size_t size )
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
 void 
 DML_checksum_accum_crc32c( uint32_t *checksuma , 
 			   uint32_t *checksumb , 
 			   const uint32_t rank , 
 			   const void *buf, 
 			   const size_t size ) ;
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif

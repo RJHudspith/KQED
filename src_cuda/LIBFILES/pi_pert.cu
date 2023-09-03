@@ -168,7 +168,7 @@ diractrace( const int n ,
 // initialise the 8-index gamma combinations
 __host__
 void
-init_g8( struct QED_kernel_temps *t )
+init_g8( int* G8 )
 {
   int i ;
   for( i = 0 ; i < 65536 ; i++ ) {
@@ -181,7 +181,7 @@ init_g8( struct QED_kernel_temps *t )
 			 (i/16)&3 ,
 			 (i/4)&3 ,
 			 i&3 } ;
-    t -> G8[ i ] = 4*diractrace(8,idx) ;
+    G8[ i ] = 4*diractrace(8,idx) ;
   }
   return ;
 }

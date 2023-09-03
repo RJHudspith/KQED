@@ -30,7 +30,7 @@ diractrace( const int n ,
 // initialises 8-index gamma thing
 __host__
 void
-init_g8( struct QED_kernel_temps *t ) ;
+init_g8( int* G8 ) ;
 
 //
 __device__

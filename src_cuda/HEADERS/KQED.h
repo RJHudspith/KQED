@@ -27,6 +27,33 @@
   #define omp_get_max_threads()(1)
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// CUDA guards
+#ifdef __CUDA_ARCH__
+#include <cuda_runtime.h>
+#define checkCudaErrors(err) __checkCudaErrors(err, __FILE__, __LINE__)
+inline void __checkCudaErrors(cudaError err, const char *file, const int line) {
+  if (cudaSuccess != err) {
+    fprintf(stderr, "%s(%i) : CUDA Runtime API error %d: %s.\n", file, line,
+            (int)err, cudaGetErrorString(err));
+    exit(EXIT_FAILURE);
+  }
+}
+#else
+#define checkCudaErrors(err) err
+#endif
+
+#ifndef __device__
+#define __device__
+#endif
+#ifndef __host__
+#define __host__
+#endif
+
+
 // coupling constant of QED appears in pi_pert.c and amu_for_lattice
 static const double AlfQED = 1.0/137.035999;
 
@@ -63,7 +90,6 @@ struct Grid_coeffs {
   int *nfx ; // 1D array [nstpx]
 } ;
 
-#ifdef __CUDA_ARCH__
 __device__ inline static double* getTX(const struct Grid_coeffs* Grid, int i) {
   return &Grid -> TX[i * Grid -> NY_tay];
 }
@@ -76,7 +102,6 @@ __device__ inline static float* getFfp(const struct Grid_coeffs* Grid, int i, in
 __device__ inline static float* getFfm(const struct Grid_coeffs* Grid, int i, int j, int k) {
   return &Grid -> Ffm[((i * Grid -> nstpx + j) * Grid -> nstpy + k) * Grid -> nfx_max];
 }
-#endif
 
 // Allocations occur in this
 // NOTE: pointers are all expected to be device ptrs
@@ -129,16 +154,20 @@ struct invariants {
 } ;
 
 
-#ifdef __CUDA_ARCH__
-#include <cuda_runtime.h>
-#define checkCudaErrors(err) __checkCudaErrors(err, __FILE__, __LINE__)
-inline void __checkCudaErrors(cudaError err, const char *file, const int line) {
-  if (cudaSuccess != err) {
-    fprintf(stderr, "%s(%i) : CUDA Runtime API error %d: %s.\n", file, line,
-            (int)err, cudaGetErrorString(err));
-    exit(EXIT_FAILURE);
-  }
-}
+// typical defines for the main example if we need more functionality
+// just add more headers here
+#include "all_kernels.h"
+#include "con_kernel.h"
+#include "sub_kernel.h"
+#include "GLU_timer.h"
+#include "init.h"
+#include "kernels.h"
+#include "pi_pert.h"
+#include "SYMXY.h"
+#include "SYMXY0.h"
+
+#ifdef __cplusplus
+} // extern "C"
 #endif
 
 

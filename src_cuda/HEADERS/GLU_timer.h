@@ -24,6 +24,10 @@
 #ifndef GLU_TIMER_H
 #define GLU_TIMER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
    @fn char* get_date( void )
    @brief returns the current date if time.h exists, otherwise returns nonsense
@@ -48,5 +52,9 @@ print_time( void ) ;
  **/
 void 
 start_timer( void ) ;
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif

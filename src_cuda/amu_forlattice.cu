@@ -4,6 +4,307 @@
 */
 #include "KQED.h"      // definitions and what have you
 
+// single point-like evaluation kernels
+__global__
+void
+ker_pt_QED_kernel_L0(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , double *d_kerv ) {
+  QED_kernel_L0(xv, yv, t, (double (*)[4][4][4]) d_kerv);
+}
+__global__
+void
+ker_pt_QED_kernel_L1(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , double *d_kerv ) {
+  QED_kernel_L1(xv, yv, t, (double (*)[4][4][4]) d_kerv);
+}
+__global__
+void
+ker_pt_QED_kernel_L2(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , double *d_kerv ) {
+  QED_kernel_L2(xv, yv, t, (double (*)[4][4][4]) d_kerv);
+}
+__global__
+void
+ker_pt_QED_Mkernel_L2(
+    const double M, const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , double *d_kerv ) {
+  QED_Mkernel_L2(M, xv, yv, t, (double (*)[4][4][4]) d_kerv);
+}
+__global__
+void
+ker_pt_QED_kernel_L3(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , double *d_kerv ) {
+  QED_kernel_L3(xv, yv, t, (double (*)[4][4][4]) d_kerv);
+}
+__global__
+void
+ker_pt_compute_all_kernels(
+    const double xv[4], const double yv[4],
+    const struct QED_kernel_temps t, struct QED_Kernels *K) {
+  compute_all_kernels(xv, yv, t, K);
+}
+__global__
+void
+ker_pt_compute_all_kernels_SYMXY_v2(
+    const double xv[4], const double yv[4],
+    const struct QED_kernel_temps t, struct Kernels *K) {
+  compute_all_kernels_SYMXY_v2(xv, yv, t, K);
+}
+__global__
+void
+ker_pt_compute_all_kernels_SYMXY(
+    const double xv[4], const double yv[4],
+    const struct QED_kernel_temps t, struct QED_Kernels *K) {
+  compute_all_kernels_SYMXY(xv, yv, t, K);
+}
+__global__
+void
+ker_pt_compute_all_kernels_SYMXY0_v2(
+    const double xv[4], const double yv[4],
+    const struct QED_kernel_temps t, struct Kernels *K) {
+  compute_all_kernels_SYMXY0_v2(xv, yv, t, K);
+}
+__global__
+void
+ker_pt_compute_all_kernels_SYMXY0(
+    const double xv[4], const double yv[4],
+    const struct QED_kernel_temps t, struct QED_Kernels *K) {
+  compute_all_kernels_SYMXY0(xv, yv, t, K);
+}
+__global__
+void
+ker_pt_compute_all_Mkernels(
+    const double M[4], const double xv[4], const double yv[4],
+    const struct QED_kernel_temps t, struct QED_Kernels *K) {
+  compute_all_Mkernels(M, xv, yv, t, K);
+}
+__global__
+void
+ker_pt_compute_all_Mkernels_v2(
+    const double M[4], const double xv[4], const double yv[4],
+    const struct QED_kernel_temps t, struct QED_Kernels *K) {
+  compute_all_Mkernels_v2(M, xv, yv, t, K);
+}
+__global__
+void
+ker_pt_compute_con_kernels(
+    const double xv[4], const double yv[4],
+    const struct QED_kernel_temps t, struct QED_Kernels *K) {
+  compute_con_kernels(xv, yv, t, K);
+}
+__global__
+void
+ker_pt_compute_con_kernels_v2(
+    const double xv[4], const double yv[4],
+    const struct QED_kernel_temps t, struct Kernels *K) {
+  compute_con_kernels_v2(xv, yv, t, K);
+}
+__global__
+void
+ker_pt_compute_con_kernelsM_L2(
+    const double M[4], const double xv[4], const double yv[4],
+    const struct QED_kernel_temps t, struct Kernels *K) {
+  compute_con_kernelsM_L2(M, xv, yv, t, K);
+}
+__global__
+void
+ker_pt_compute_sub_kernelsM_L2(
+    const double M[4], const double xv[4], const double yv[4],
+    const struct QED_kernel_temps t, struct Kernels *K) {
+  compute_sub_kernelsM_L2(M, xv, yv, t, K);
+}
+__global__
+void
+ker_pt_ipihatFermLoop_antisym(
+    const double xv[4], const double yv[4],
+    const struct QED_kernel_temps t, double *d_vpihat) {
+  ipihatFermLoop_antisym(xv, yv, t, (double (*)[4][4][4]) d_vpihat);
+}
+
+    
+void
+cu_pt_QED_kernel_L0(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , double kerv[6][4][4][4] ) {
+  double *d_kerv;
+  size_t sizeof_kerv = 6*4*4*4*sizeof(double);
+  checkCudaErrors(cudaMalloc(&d_kerv, sizeof_kerv));
+  ker_pt_QED_kernel_L0<<<1,1>>>( xv, yv, t, d_kerv );
+  checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_kerv));
+}
+void
+cu_pt_QED_kernel_L1(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , double kerv[6][4][4][4] ) {
+  double *d_kerv;
+  size_t sizeof_kerv = 6*4*4*4*sizeof(double);
+  checkCudaErrors(cudaMalloc(&d_kerv, sizeof_kerv));
+  ker_pt_QED_kernel_L1<<<1,1>>>( xv, yv, t, d_kerv );
+  checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_kerv));
+}
+void
+cu_pt_QED_kernel_L2(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , double kerv[6][4][4][4] ) {
+  double *d_kerv;
+  size_t sizeof_kerv = 6*4*4*4*sizeof(double);
+  checkCudaErrors(cudaMalloc(&d_kerv, sizeof_kerv));
+  ker_pt_QED_kernel_L2<<<1,1>>>( xv, yv, t, d_kerv );
+  checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_kerv));
+}
+void
+cu_pt_QED_Mkernel_L2(
+    const double M, const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , double kerv[6][4][4][4] ) {
+  double *d_kerv;
+  size_t sizeof_kerv = 6*4*4*4*sizeof(double);
+  checkCudaErrors(cudaMalloc(&d_kerv, sizeof_kerv));
+  ker_pt_QED_Mkernel_L2<<<1,1>>>( M, xv, yv, t, d_kerv );
+  checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_kerv));
+}
+void
+cu_pt_QED_kernel_L3(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , double kerv[6][4][4][4] ) {
+  double *d_kerv;
+  size_t sizeof_kerv = 6*4*4*4*sizeof(double);
+  checkCudaErrors(cudaMalloc(&d_kerv, sizeof_kerv));
+  ker_pt_QED_kernel_L3<<<1,1>>>( xv, yv, t, d_kerv );
+  checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_kerv));
+}
+
+void
+cu_pt_compute_all_kernels(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , struct QED_Kernels *K ) {
+  struct QED_Kernels *d_K;
+  checkCudaErrors(cudaMalloc(&d_K, sizeof(QED_Kernels)));
+  ker_pt_compute_all_kernels<<<1,1>>>( xv, yv, t, d_K );
+  checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_K));
+}
+void
+cu_pt_compute_all_kernels_SYMXY_v2(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , struct Kernels *K ) {
+  struct Kernels *d_K;
+  checkCudaErrors(cudaMalloc(&d_K, sizeof(Kernels)));
+  ker_pt_compute_all_kernels_SYMXY_v2<<<1,1>>>( xv, yv, t, d_K );
+  checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_K));
+}
+void
+cu_pt_compute_all_kernels_SYMXY(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , struct QED_Kernels *K ) {
+  struct QED_Kernels *d_K;
+  checkCudaErrors(cudaMalloc(&d_K, sizeof(QED_Kernels)));
+  ker_pt_compute_all_kernels_SYMXY<<<1,1>>>( xv, yv, t, d_K );
+  checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_K));
+}
+void
+cu_pt_compute_all_kernels_SYMXY0_v2(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , struct Kernels *K ) {
+  struct Kernels *d_K;
+  checkCudaErrors(cudaMalloc(&d_K, sizeof(Kernels)));
+  ker_pt_compute_all_kernels_SYMXY0_v2<<<1,1>>>( xv, yv, t, d_K );
+  checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_K));
+}
+void
+cu_pt_compute_all_kernels_SYMXY0(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , struct QED_Kernels *K ) {
+  struct QED_Kernels *d_K;
+  checkCudaErrors(cudaMalloc(&d_K, sizeof(QED_Kernels)));
+  ker_pt_compute_all_kernels_SYMXY0<<<1,1>>>( xv, yv, t, d_K );
+  checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_K));
+}
+void
+cu_pt_compute_all_Mkernels(
+    const double M[4], const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , struct QED_Kernels *K ) {
+  struct QED_Kernels *d_K;
+  checkCudaErrors(cudaMalloc(&d_K, sizeof(QED_Kernels)));
+  ker_pt_compute_all_Mkernels<<<1,1>>>( M, xv, yv, t, d_K );
+  checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_K));
+}
+void
+cu_pt_compute_all_Mkernels_v2(
+    const double M[4], const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , struct QED_Kernels *K ) {
+  struct QED_Kernels *d_K;
+  checkCudaErrors(cudaMalloc(&d_K, sizeof(QED_Kernels)));
+  ker_pt_compute_all_Mkernels_v2<<<1,1>>>( M, xv, yv, t, d_K );
+  checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_K));
+}
+void
+cu_pt_compute_con_kernels(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , struct QED_Kernels *K ) {
+  struct QED_Kernels *d_K;
+  checkCudaErrors(cudaMalloc(&d_K, sizeof(QED_Kernels)));
+  ker_pt_compute_con_kernels<<<1,1>>>( xv, yv, t, d_K );
+  checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_K));
+}
+void
+cu_pt_compute_con_kernels_v2(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , struct Kernels *K ) {
+  struct Kernels *d_K;
+  checkCudaErrors(cudaMalloc(&d_K, sizeof(Kernels)));
+  ker_pt_compute_con_kernels_v2<<<1,1>>>( xv, yv, t, d_K );
+  checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_K));
+}
+void
+cu_pt_compute_con_kernelsM_L2(
+    const double M[4], const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , struct Kernels *K ) {
+  struct Kernels *d_K;
+  checkCudaErrors(cudaMalloc(&d_K, sizeof(Kernels)));
+  ker_pt_compute_con_kernelsM_L2<<<1,1>>>( M, xv, yv, t, d_K );
+  checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_K));
+}
+void
+cu_pt_compute_sub_kernelsM_L2(
+    const double M[4], const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , struct Kernels *K ) {
+  struct Kernels *d_K;
+  checkCudaErrors(cudaMalloc(&d_K, sizeof(Kernels)));
+  ker_pt_compute_sub_kernelsM_L2<<<1,1>>>( M, xv, yv, t, d_K );
+  checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_K));
+}
+void
+cu_pt_ipihatFermLoop_antisym(
+    const double xv[4] , const double yv[4] ,
+    const struct QED_kernel_temps t , double vpihat[6][4][4][4] ) {
+  double *d_vpihat;
+  size_t sizeof_vpihat = 6*4*4*4*sizeof(double);
+  checkCudaErrors(cudaMalloc(&d_vpihat, sizeof_vpihat));
+  ker_pt_ipihatFermLoop_antisym<<<1,1>>>( xv, yv, t, d_vpihat );
+  checkCudaErrors(cudaMemcpy(vpihat, d_vpihat, sizeof_vpihat, cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_vpihat));
+}
+
+
 // pretend discrete volume
 static const size_t LVOLUME = (2*2*2*4) ;
 
@@ -92,9 +393,9 @@ example1( const struct QED_kernel_temps t )
 	const double yvMv[4] = { 0 , 0 , 0 , vi[2]*Mv } ; 
 	const double xvMv[4] = { 0 , 0 , vi[0]*si*Mv , vi[0]*co*Mv } ;
     
-	QED_kernel_L0( xv, yv, t, kerv ) ;
+	cu_pt_QED_kernel_L0( xv, yv, t, kerv ) ;
     
-	ipihatFermLoop_antisym( xvMv, yvMv, t, pihat );
+	cu_pt_ipihatFermLoop_antisym( xvMv, yvMv, t, pihat );
     
 	const double *pi = (const double*)pihat ;
 	const double *kp = (const double*)kerv ;
@@ -138,13 +439,13 @@ example2( const struct QED_kernel_temps t )
   printf("# vi[0]= %lg   vi[1] = %lg   vi[2] = %lg\n",
 	 vi[0] , vi[1] , vi[2] ) ;
 
-  QED_kernel_L0( xv , yv , t , kerv1 ) ;
-  QED_kernel_L0( zero , yv , t , kerv2 ) ;
+  cu_pt_QED_kernel_L0( xv , yv , t , kerv1 ) ;
+  cu_pt_QED_kernel_L0( zero , yv , t , kerv2 ) ;
   
   print_kernels( (const double*)kerv1 , (const double*)kerv2 , file ) ;
 
-  QED_kernel_L0( yv , xv , t , kerv1 ) ;
-  QED_kernel_L0( xv , zero , t , kerv2 ) ;
+  cu_pt_QED_kernel_L0( yv , xv , t , kerv1 ) ;
+  cu_pt_QED_kernel_L0( xv , zero , t , kerv2 ) ;
   
   print_kernels( (const double*)kerv1 , (const double*)kerv2 , file ) ;
 
@@ -169,8 +470,8 @@ example3( const struct QED_kernel_temps t )
   printbar() ;
   // test that L_0(0,0) == 0 and that L_1(x,x) == 0
   fprintf( stdout , "\nTesting that L_0(0,0) = L_1(x,x) == 0\n" ) ;
-  QED_kernel_L0( zero , zero , t , kerv1 ) ;
-  QED_kernel_L1( xv , xv , t , kerv2 ) ;
+  cu_pt_QED_kernel_L0( zero , zero , t , kerv1 ) ;
+  cu_pt_QED_kernel_L1( xv , xv , t , kerv2 ) ;
   if( kernel_nonzero( (const double*)kerv1 ) ||
       kernel_nonzero( (const double*)kerv2 ) ) {
     print_kernels( (const double*)kerv1 , (const double*)kerv2 , file ) ;
@@ -178,8 +479,8 @@ example3( const struct QED_kernel_temps t )
   }
   // test that L_2(0,y) == 0 and that L_2(x,0) == 0
   fprintf( stdout , "\nTesting that L_2(0,y) = L_2(x,0) == 0\n" ) ;
-  QED_kernel_L2( zero , yv , t , kerv1 ) ;
-  QED_kernel_L2( xv , zero , t , kerv2 ) ;
+  cu_pt_QED_kernel_L2( zero , yv , t , kerv1 ) ;
+  cu_pt_QED_kernel_L2( xv , zero , t , kerv2 ) ;
   if( kernel_nonzero( (const double*)kerv1 ) ||
       kernel_nonzero( (const double*)kerv2 ) ) {
     print_kernels( (const double*)kerv1 , (const double*)kerv2 , file ) ;
@@ -187,10 +488,10 @@ example3( const struct QED_kernel_temps t )
   }
   // test that L_3(x,x) = L_3(0,y) == L_3(y,y) == L_3(0,x) == 0
   fprintf( stdout , "\nTesting that L_3(x,x) = L_3(0,y) == L_3(y,y) == L_3(0,x) ==  0\n" ) ;
-  QED_kernel_L3( xv , xv , t , kerv1 ) ;
-  QED_kernel_L3( zero , yv , t , kerv2 ) ;
-  QED_kernel_L3( zero , xv , t , kerv3 ) ;
-  QED_kernel_L3( yv , yv , t , kerv4 ) ;
+  cu_pt_QED_kernel_L3( xv , xv , t , kerv1 ) ;
+  cu_pt_QED_kernel_L3( zero , yv , t , kerv2 ) ;
+  cu_pt_QED_kernel_L3( zero , xv , t , kerv3 ) ;
+  cu_pt_QED_kernel_L3( yv , yv , t , kerv4 ) ;
   if( kernel_nonzero( (const double*)kerv1 ) ||
       kernel_nonzero( (const double*)kerv2 ) ||
       kernel_nonzero( (const double*)kerv3 ) ||
@@ -219,9 +520,9 @@ example4( const struct QED_kernel_temps t )
 
   start_timer() ;
 
-  QED_kernel_L0( x , y , t , kerv1 ) ;
+  cu_pt_QED_kernel_L0( x , y , t , kerv1 ) ;
 
-  QED_kernel_L0( y , x , t , kerv2 ) ; 
+  cu_pt_QED_kernel_L0( y , x , t , kerv2 ) ; 
 
   print_kernels( (const double*)kerv1 , (const double*)kerv2 , file ) ;
 
@@ -245,9 +546,9 @@ example5( const struct QED_kernel_temps t )
 
   start_timer() ;
 
-  QED_kernel_L0( x , y , t , kerv1 ) ;
+  cu_pt_QED_kernel_L0( x , y , t , kerv1 ) ;
 
-  QED_kernel_L0( y , x , t , kerv2 ) ; 
+  cu_pt_QED_kernel_L0( y , x , t , kerv2 ) ; 
 
   print_kernels( (const double*)kerv1 , (const double*)kerv2 , file ) ;
 
@@ -273,9 +574,9 @@ example6( const struct QED_kernel_temps t )
   
   start_timer() ;
 
-  QED_kernel_L0( x , y , t , kerv1 ) ;
+  cu_pt_QED_kernel_L0( x , y , t , kerv1 ) ;
 
-  QED_kernel_L0( y , x , t , kerv2 ) ; 
+  cu_pt_QED_kernel_L0( y , x , t , kerv2 ) ; 
 
   print_kernels( (const double*)kerv1 , (const double*)kerv2 , file ) ;
 
@@ -300,9 +601,9 @@ example7( const struct QED_kernel_temps t )
   
   start_timer() ;
 
-  QED_kernel_L0( x , y , t , kerv1 ) ;
+  cu_pt_QED_kernel_L0( x , y , t , kerv1 ) ;
 
-  QED_kernel_L0( y , x , t , kerv2 ) ; 
+  cu_pt_QED_kernel_L0( y , x , t , kerv2 ) ; 
 
   print_kernels( (const double*)kerv1 , (const double*)kerv2 , file ) ;
 
@@ -331,8 +632,8 @@ example9( const struct QED_kernel_temps t )
     const double zero[4] = { 0,0,0,0 };
     const double x[4] = { theta,2*theta,3*theta,4*theta };
     
-    QED_kernel_L0( x , x , t , kerv1 ) ;
-    QED_kernel_L0( x , zero , t , kerv2 ) ;
+    cu_pt_QED_kernel_L0( x , x , t , kerv1 ) ;
+    cu_pt_QED_kernel_L0( x , zero , t , kerv2 ) ;
     
     size_t i , j , k , l ;
     for( i = 0 ; i < 6 ; i++ ) {
@@ -368,8 +669,8 @@ example10( const struct QED_kernel_temps t )
   
   start_timer() ;
 
-  QED_kernel_L0( zero , x , t , kerv1 ) ;
-  QED_kernel_L0( x , zero , t , kerv2 ) ;
+  cu_pt_QED_kernel_L0( zero , x , t , kerv1 ) ;
+  cu_pt_QED_kernel_L0( x , zero , t , kerv2 ) ;
 
   print_kernels( (const double*)kerv1 , (const double*)kerv2 , file ) ;
 
@@ -407,20 +708,20 @@ example11( const struct QED_kernel_temps t )
 	
 	switch( n ) {
 	case 0 :
-	  QED_kernel_L0( x , y , t , kerv1 ) ;
-	  QED_kernel_L0( mx , my , t , kerv2 ) ;
+	  cu_pt_QED_kernel_L0( x , y , t , kerv1 ) ;
+	  cu_pt_QED_kernel_L0( mx , my , t , kerv2 ) ;
 	  break ;
 	case 1 :
-	  QED_kernel_L1( x , y , t , kerv1 ) ;
-	  QED_kernel_L1( mx , my , t , kerv2 ) ;
+	  cu_pt_QED_kernel_L1( x , y , t , kerv1 ) ;
+	  cu_pt_QED_kernel_L1( mx , my , t , kerv2 ) ;
 	  break ;
 	case 2 :
-	  QED_kernel_L2( x , y , t , kerv1 ) ;
-	  QED_kernel_L2( mx , my , t , kerv2 ) ;
+	  cu_pt_QED_kernel_L2( x , y , t , kerv1 ) ;
+	  cu_pt_QED_kernel_L2( mx , my , t , kerv2 ) ;
 	  break ;
 	case 3 :
-	  QED_kernel_L3( x , y , t , kerv1 ) ;
-	  QED_kernel_L3( mx , my , t , kerv2 ) ;
+	  cu_pt_QED_kernel_L3( x , y , t , kerv1 ) ;
+	  cu_pt_QED_kernel_L3( mx , my , t , kerv2 ) ;
 	  break ;
 	default :
 	  break ;
@@ -488,40 +789,40 @@ example12( const struct QED_kernel_temps t )
     for( j = 0 ; j < LVOLUME ; j++ ) {
       HLBL_crds( x , j ) ;
   
-      compute_all_kernels( x , y , t , &K ) ;
+      cu_pt_compute_all_kernels( x , y , t , &K ) ;
       
       double Ltest[6][4][4][4] KQED_ALIGN ;
       size_t tests_failed = 0 ;
   
       // check L1 kernels
-      QED_kernel_L1( x , y , t , Ltest ) ;
+      cu_pt_QED_kernel_L1( x , y , t , Ltest ) ;
       if( !equivalent_kernels( Ltest , K.L1.xy ) ) {
 	fprintf( stderr , "Inequivalent kernels L1xy\n" ) ;
 	tests_failed++ ;
       }
-      QED_kernel_L1( y , x , t , Ltest ) ;
+      cu_pt_QED_kernel_L1( y , x , t , Ltest ) ;
       if( !equivalent_kernels( Ltest , K.L1.yx ) ) {
 	fprintf( stderr , "Inequivalent kernels L1yx\n" ) ;
 	tests_failed++ ;
       }
       // check L2 kernels
-      QED_kernel_L2( x , y , t , Ltest ) ;
+      cu_pt_QED_kernel_L2( x , y , t , Ltest ) ;
       if( !equivalent_kernels( Ltest , K.L2.xy ) ) {
 	fprintf( stderr , "Inequivalent kernels L2xy\n" ) ;
 	tests_failed++ ;
       }
-      QED_kernel_L2( y , x , t , Ltest ) ;
+      cu_pt_QED_kernel_L2( y , x , t , Ltest ) ;
       if( !equivalent_kernels( Ltest , K.L2.yx ) ) {
 	fprintf( stderr , "Inequivalent kernels L2yx\n" ) ;
 	tests_failed++ ;
       }
       // check L3 kernels
-      QED_kernel_L3( x , y , t , Ltest ) ;
+      cu_pt_QED_kernel_L3( x , y , t , Ltest ) ;
       if( !equivalent_kernels( Ltest , K.L3.xy ) ) {
 	fprintf( stderr , "Inequivalent kernels L3xy\n" ) ;
 	tests_failed++ ;
       }
-      QED_kernel_L3( y , x , t , Ltest ) ;
+      cu_pt_QED_kernel_L3( y , x , t , Ltest ) ;
       if( !equivalent_kernels( Ltest , K.L3.yx ) ) {
 	fprintf( stderr , "Inequivalent kernels L3yx\n" ) ;
 	tests_failed++ ;
@@ -555,8 +856,8 @@ example13( const struct QED_kernel_temps t )
     for( Y = 0 ; Y < LVOLUME ; Y++ ) {
       HLBL_crds( x , Y ) ;
   
-      compute_all_kernels_SYMXY_v2( x , y , t , &K1 ) ;
-      compute_all_kernels_SYMXY_v2( y , x , t , &K2 ) ;
+      cu_pt_compute_all_kernels_SYMXY_v2( x , y , t , &K1 ) ;
+      cu_pt_compute_all_kernels_SYMXY_v2( y , x , t , &K2 ) ;
 
       size_t i , j , k , l ;
       for( i = 0 ; i < 6 ; i++ ) {
@@ -610,16 +911,16 @@ example14( const struct QED_kernel_temps t )
     for( Y = 0 ; Y < LVOLUME ; Y++ ) {
       HLBL_crds( x , Y ) ;
   
-      compute_all_kernels_SYMXY0_v2( x , y , t , &K1xy ) ;
-      compute_all_kernels_SYMXY0_v2( y , x , t , &K1yx ) ;
+      cu_pt_compute_all_kernels_SYMXY0_v2( x , y , t , &K1xy ) ;
+      cu_pt_compute_all_kernels_SYMXY0_v2( y , x , t , &K1yx ) ;
 
       const double xmy[4] = { x[0]-y[0] , x[1]-y[1] ,
 			      x[2]-y[2] , x[3]-y[3] } ;
       const double ymx[4] = { -xmy[0] , -xmy[1] , -xmy[2] , -xmy[3] } ;
-      compute_all_kernels_SYMXY0_v2( x , xmy , t , &K2xy ) ;
-      compute_all_kernels_SYMXY0_v2( xmy , x , t , &K2yx ) ;
-      compute_all_kernels_SYMXY0_v2( y , ymx , t , &K3xy ) ;
-      compute_all_kernels_SYMXY0_v2( ymx , y , t , &K3yx ) ;
+      cu_pt_compute_all_kernels_SYMXY0_v2( x , xmy , t , &K2xy ) ;
+      cu_pt_compute_all_kernels_SYMXY0_v2( xmy , x , t , &K2yx ) ;
+      cu_pt_compute_all_kernels_SYMXY0_v2( y , ymx , t , &K3xy ) ;
+      cu_pt_compute_all_kernels_SYMXY0_v2( ymx , y , t , &K3yx ) ;
 
       size_t i , j , k , l ;
       for( i = 0 ; i < 6 ; i++ ) {
@@ -710,11 +1011,11 @@ example15( const struct QED_kernel_temps t )
 			      x[2]-y[2] , x[3]-y[3] } ;
       const double ymx[4] = { -xmy[0] , -xmy[1] , -xmy[2] , -xmy[3] } ;
     
-      QED_kernel_L0( xmy , zero , t , k1 ) ;
-      QED_kernel_L0( ymx , zero , t , k2 ) ;
+      cu_pt_QED_kernel_L0( xmy , zero , t , k1 ) ;
+      cu_pt_QED_kernel_L0( ymx , zero , t , k2 ) ;
       
-      QED_kernel_L0( zero , xmy , t , k3 ) ;
-      QED_kernel_L0( zero , ymx , t , k4 ) ;
+      cu_pt_QED_kernel_L0( zero , xmy , t , k3 ) ;
+      cu_pt_QED_kernel_L0( zero , ymx , t , k4 ) ;
     
       size_t i , j , k , l ;
       for( i = 0 ; i < 6 ; i++ ) {
@@ -763,10 +1064,10 @@ example16( const struct QED_kernel_temps t )
 
       struct QED_Kernels K1 , K2 , K3 ;
       struct Kernels K ;
-      compute_all_kernels( x , y , t , &K1 ) ;
-      compute_all_kernels( x , xmy , t , &K2 ) ;
-      compute_all_kernels( y , ymx , t , &K3 ) ;
-      compute_all_kernels_SYMXY0_v2( x , y , t , &K ) ;
+      cu_pt_compute_all_kernels( x , y , t , &K1 ) ;
+      cu_pt_compute_all_kernels( x , xmy , t , &K2 ) ;
+      cu_pt_compute_all_kernels( y , ymx , t , &K3 ) ;
+      cu_pt_compute_all_kernels_SYMXY0_v2( x , y , t , &K ) ;
       
       size_t i , j , k , l ;
       register double L = 0 ;
@@ -836,10 +1137,10 @@ example17( const struct QED_kernel_temps t )
 			      x[2]-y[2] , x[3]-y[3] } ;
 
       struct QED_Kernels K1 , K2 , K3 ;
-      compute_con_kernels( x , y , t , &K1 ) ;
+      cu_pt_compute_con_kernels( x , y , t , &K1 ) ;
 
-      compute_all_kernels( x , y , t , &K2 ) ;
-      compute_all_kernels( x , xmy , t , &K3 ) ;
+      cu_pt_compute_all_kernels( x , y , t , &K2 ) ;
+      cu_pt_compute_all_kernels( x , xmy , t , &K3 ) ;
       
       size_t i , j , k , l ;
       register double L = 0 ;
@@ -930,10 +1231,10 @@ example18( const struct QED_kernel_temps t )
 
       struct Kernels K1[3] ;
       struct QED_Kernels K2 , K3 ;
-      compute_con_kernels_v2( x , y , t , K1 ) ;
+      cu_pt_compute_con_kernels_v2( x , y , t , K1 ) ;
 
-      compute_all_kernels( x , y , t , &K2 ) ;
-      compute_all_kernels( x , xmy , t , &K3 ) ;
+      cu_pt_compute_all_kernels( x , y , t , &K2 ) ;
+      cu_pt_compute_all_kernels( x , xmy , t , &K3 ) ;
       
       size_t i , j , k , l ;
       register double L = 0 ;
@@ -1026,8 +1327,8 @@ example19( const struct QED_kernel_temps t )
       HLBL_crds( x , j ) ;
       
       struct QED_Kernels K2 , K3 ;
-      compute_all_kernels( x , y , t , &K2 ) ;
-      compute_all_kernels( x , y , t , &K3 ) ;
+      cu_pt_compute_all_kernels( x , y , t , &K2 ) ;
+      cu_pt_compute_all_kernels( x , y , t , &K3 ) ;
       swap_munu_Lyx( &K3 ) ;
       
       register double L = 0 ;
@@ -1096,14 +1397,14 @@ example20( const struct QED_kernel_temps t )
       // todo :: a sensible test here
       double M[4] = { 0. , 0.5 , 1.0 , 1.5 } ;
       struct Kernels K[3] ;
-      compute_con_kernelsM_L2( M , x , y , t , K ) ;
+      cu_pt_compute_con_kernelsM_L2( M , x , y , t , K ) ;
 
       // test against L2 for each M and xy,yx,x-y combo
       double K1[6][4][4][4] , K2[6][4][4][4] , K3[6][4][4][4] ;
 
-      QED_Mkernel_L2( M[0] , x , y , t , K1 ) ;
-      QED_Mkernel_L2( M[0] , y , x , t , K2 ) ;
-      QED_Mkernel_L2( M[0] , x , xmy , t , K3 ) ;   
+      cu_pt_QED_Mkernel_L2( M[0] , x , y , t , K1 ) ;
+      cu_pt_QED_Mkernel_L2( M[0] , y , x , t , K2 ) ;
+      cu_pt_QED_Mkernel_L2( M[0] , x , xmy , t , K3 ) ;   
       for( rhosig = 0 ; rhosig < 6 ; rhosig++ ) {
 	for( mu = 0 ; mu < 4 ; mu++ ) {
 	  for( nu = 0 ; nu < 4 ; nu++ ) {
@@ -1127,9 +1428,9 @@ example20( const struct QED_kernel_temps t )
       }
 
       //
-      QED_Mkernel_L2( M[1] , x , y , t , K1 ) ;
-      QED_Mkernel_L2( M[1] , y , x , t , K2 ) ;
-      QED_Mkernel_L2( M[1] , x , xmy , t , K3 ) ;
+      cu_pt_QED_Mkernel_L2( M[1] , x , y , t , K1 ) ;
+      cu_pt_QED_Mkernel_L2( M[1] , y , x , t , K2 ) ;
+      cu_pt_QED_Mkernel_L2( M[1] , x , xmy , t , K3 ) ;
       for( rhosig = 0 ; rhosig < 6 ; rhosig++ ) {
 	for( mu = 0 ; mu < 4 ; mu++ ) {
 	  for( nu = 0 ; nu < 4 ; nu++ ) {
@@ -1172,11 +1473,11 @@ example21( const struct QED_kernel_temps t )
 
       const double M[4] = { 0.0 , 0.4 , 0.8 , 1.2 } ;
       struct QED_Kernels K ;
-      compute_all_Mkernels( M , x , y , t , &K ) ;
+      cu_pt_compute_all_Mkernels( M , x , y , t , &K ) ;
 
       double L1[6][4][4][4] KQED_ALIGN , L2[6][4][4][4] KQED_ALIGN ;
-      QED_kernel_L2( x , y , t , L1 ) ;
-      QED_kernel_L2( y , x , t , L2 ) ;
+      cu_pt_QED_kernel_L2( x , y , t , L1 ) ;
+      cu_pt_QED_kernel_L2( y , x , t , L2 ) ;
 
       double L = 0.0 ;
       for( rhosig = 0 ; rhosig < 6 ; rhosig++ ) {
@@ -1201,8 +1502,8 @@ example21( const struct QED_kernel_temps t )
       }
       
       // M != 0
-      QED_Mkernel_L2( M[1] , x , y , t , L1 ) ;
-      QED_Mkernel_L2( M[1] , y , x , t , L2 ) ;
+      cu_pt_QED_Mkernel_L2( M[1] , x , y , t , L1 ) ;
+      cu_pt_QED_Mkernel_L2( M[1] , y , x , t , L2 ) ;
       for( rhosig = 0 ; rhosig < 6 ; rhosig++ ) {
 	for( mu = 0 ; mu < 4 ; mu++ ) {
 	  for( nu = 0 ; nu < 4 ; nu++ ) {
@@ -1244,8 +1545,8 @@ example22( const struct QED_kernel_temps t )
     FILE *file = fopen( str , "w" ) ;
     double K1[6][4][4][4] KQED_ALIGN ;
     double K2[6][4][4][4] KQED_ALIGN ;
-    QED_kernel_L0( x , y , t , K1 ) ;
-    QED_kernel_L0( y , x , t , K2 ) ;
+    cu_pt_QED_kernel_L0( x , y , t , K1 ) ;
+    cu_pt_QED_kernel_L0( y , x , t , K2 ) ;
 
     print_kernels( (const double*)K1 , (const double*)K2 , file ) ;
     
@@ -1270,12 +1571,12 @@ example23( const struct QED_kernel_temps t )
 
       const double M[4] = { 0.0 , 0.4 , 0.8 , 1.2 } ;
       struct QED_Kernels K1 , K2 ;
-      compute_all_Mkernels( M , x , y , t , &K1 ) ;
-      compute_all_Mkernels_v2( M , x , y , t , &K2 ) ;
+      cu_pt_compute_all_Mkernels( M , x , y , t , &K1 ) ;
+      cu_pt_compute_all_Mkernels_v2( M , x , y , t , &K2 ) ;
 
       double L1[6][4][4][4] KQED_ALIGN ;
       const double my[4] = { -y[0] , -y[1] , -y[2] , -y[3] } ;
-      QED_Mkernel_L2( M[1] , x , my , t , L1 ) ;
+      cu_pt_QED_Mkernel_L2( M[1] , x , my , t , L1 ) ;
 
       for( rhosig = 0 ; rhosig < 6 ; rhosig++ ) {
 	for( mu = 0 ; mu < 4 ; mu++ ) {
@@ -1333,13 +1634,13 @@ example24( const struct QED_kernel_temps t )
 			      x[2]-y[2] , x[3]-y[3] } ;
       const double M[4] = { 0. , 0.5 , 1.0 , 1.5 } ;
       struct Kernels K[3] ;
-      compute_sub_kernelsM_L2( M , x , y , t , K ) ;
+      cu_pt_compute_sub_kernelsM_L2( M , x , y , t , K ) ;
 
       // test against L2 for each M and xy,yx,x-y combo
       double K1[6][4][4][4] , K2[6][4][4][4] , K3[6][4][4][4] ;
-      QED_Mkernel_L2( M[0] , x , y , t , K1 ) ;
-      QED_Mkernel_L2( M[0] , y , x , t , K2 ) ;
-      QED_Mkernel_L2( M[0] , x , xmy , t , K3 ) ;
+      cu_pt_QED_Mkernel_L2( M[0] , x , y , t , K1 ) ;
+      cu_pt_QED_Mkernel_L2( M[0] , y , x , t , K2 ) ;
+      cu_pt_QED_Mkernel_L2( M[0] , x , xmy , t , K3 ) ;
 
       for( rhosig = 0 ; rhosig < 6 ; rhosig++ ) {
 	for( mu = 0 ; mu < 4 ; mu++ ) {
@@ -1366,9 +1667,9 @@ example24( const struct QED_kernel_temps t )
       }
 
       //
-      QED_Mkernel_L2( M[1] , x , y , t , K1 ) ;
-      QED_Mkernel_L2( M[1] , y , x , t , K2 ) ;
-      QED_Mkernel_L2( M[1] , x , xmy , t , K3 ) ;
+      cu_pt_QED_Mkernel_L2( M[1] , x , y , t , K1 ) ;
+      cu_pt_QED_Mkernel_L2( M[1] , y , x , t , K2 ) ;
+      cu_pt_QED_Mkernel_L2( M[1] , x , xmy , t , K3 ) ;
       for( rhosig = 0 ; rhosig < 6 ; rhosig++ ) {
 	for( mu = 0 ; mu < 4 ; mu++ ) {
 	  for( nu = 0 ; nu < 4 ; nu++ ) {
@@ -1413,7 +1714,7 @@ stress_test( const struct QED_kernel_temps t )
   const double M[4] = { 0. , 0.5 , 1.0 , 1.5 } ;
   for( i = 0 ; i < V ; i++ ) {
     struct Kernels K[3] ;
-    compute_con_kernelsM_L2( M , x , y , t , K ) ;
+    cu_pt_compute_con_kernelsM_L2( M , x , y , t , K ) ;
   }
   print_time() ;
 #if (defined HAVE_OMP_H)
@@ -1423,7 +1724,7 @@ stress_test( const struct QED_kernel_temps t )
 #pragma omp parallel for private(i)
   for( i = 0 ; i < V ; i++ ) {
     struct Kernels K[3] ;
-    compute_con_kernelsM_L2( M , x , y , t , K ) ;
+    cu_pt_compute_con_kernelsM_L2( M , x , y , t , K ) ;
   }
   print_time() ;
 #endif

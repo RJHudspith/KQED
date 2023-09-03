@@ -67,7 +67,7 @@ read_ff( struct Grid_coeffs *Grid )
   FREAD64( XX , sizeof( double ) , Grid -> nstpx , fr ) ;
   uint32_t cksumXX[2] = { 0 , 0 } , cksumXX_r[2] ;
   DML_checksum_accum_crc32c( &cksumXX[0] , &cksumXX[1] , 
-			     0 , (char*)Grid -> XX ,
+			     0 , (char*)XX ,
 			     Grid -> nstpx*sizeof(double) ) ;
   FREAD32( cksumXX_r , sizeof( uint32_t ) , 2 , fr ) ;
   if( cksumXX[0] != cksumXX_r[0] || cksumXX[1] != cksumXX_r[1] ) {
@@ -79,7 +79,6 @@ read_ff( struct Grid_coeffs *Grid )
   checkCudaErrors(cudaMalloc(&Grid->XX, Grid -> nstpx * sizeof( double )));
   checkCudaErrors(cudaMemcpy(
       Grid->XX, XX, Grid -> nstpx * sizeof( double ), cudaMemcpyHostToDevice));
-  free(XX);
 
   // allocate nfx
   checkCudaErrors(cudaMalloc(&Grid->nfx, Grid -> nstpx * sizeof( int ) )) ;
@@ -91,7 +90,7 @@ read_ff( struct Grid_coeffs *Grid )
   FREAD64( YY , sizeof( double ) , Grid -> nstpy , fr ) ;
   uint32_t cksumYY[2] = { 0 , 0 } , cksumYY_r[2] ;
   DML_checksum_accum_crc32c( &cksumYY[0] , &cksumYY[1] , 
-			     0 , (char*)Grid -> YY ,
+			     0 , (char*)YY ,
 			     Grid -> nstpy*sizeof(double) ) ;
   FREAD32( cksumYY_r , sizeof( uint32_t ) , 2 , fr ) ;
   if( cksumYY[0] != cksumYY_r[0] || cksumYY[1] != cksumYY_r[1] ) {
@@ -103,14 +102,15 @@ read_ff( struct Grid_coeffs *Grid )
   checkCudaErrors(cudaMalloc(&Grid->YY, Grid -> nstpy * sizeof( double )));
   checkCudaErrors(cudaMemcpy(
       Grid->YY, YY, Grid -> nstpy * sizeof( double ), cudaMemcpyHostToDevice));
-  free(YY);
 
 #ifdef VERBOSE
   fprintf( stdout , "Nstpx %d :: Nstpy %d\n" , Grid -> nstpx , Grid -> nstpy ) ;
 #endif
   
-  Grid -> xstp = ( Grid -> XX[1] - Grid -> XX[0] ) ;
-  Grid -> ystp = ( Grid -> YY[1] - Grid -> YY[0] ) ;    
+  Grid -> xstp = ( XX[1] - XX[0] ) ;
+  Grid -> ystp = ( YY[1] - YY[0] ) ;    
+  free(XX);
+  free(YY);
 
 #ifdef VERBOSE
   fprintf( stdout , "xstp %e :: ystp %e\n" , Grid -> xstp , Grid -> ystp ) ;
@@ -331,9 +331,9 @@ read_TAYLORY( struct Grid_coeffs *Grid )
       return 1 ;
     }
     // Grid -> TY[i] = malloc( Grid -> NX_tay * sizeof( double ) ) ;
-    FREAD64( &Grid -> TY[i * NXTAY] , sizeof( double ) , Grid -> NX_tay , fr ) ;
+    FREAD64( &TY[i * NXTAY] , sizeof( double ) , Grid -> NX_tay , fr ) ;
     DML_checksum_accum_crc32c( &cksuma , &cksumb , 
-			       i , &Grid -> TY[i * NXTAY] ,
+			       i , &TY[i * NXTAY] ,
 			       Grid->NX_tay * sizeof(double) ) ;
   }
   checkCudaErrors(cudaMalloc( &Grid -> TY, TY_LEN * NXTAY * sizeof( double ) )) ;
@@ -464,7 +464,7 @@ write_TAYLORX( const struct Grid_coeffs *Grid )
     fwrite( &Grid -> NY_tay , sizeof( int ) , 1 , fw ) ;
     fwrite( &TX[i * Grid -> NY_tay] , sizeof( double ) , Grid -> NY_tay , fw  ) ;
     DML_checksum_accum_crc32c( &cksuma , &cksumb , 
-			       i , &Grid -> TX[i * Grid -> NY_tay] ,
+			       i , &TX[i * Grid -> NY_tay] ,
 			       Grid->NY_tay * sizeof(double) ) ;
   }
   free( TX ) ;

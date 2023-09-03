@@ -24,6 +24,10 @@
 #ifndef GLU_BSWAP_H
 #define GLU_BSWAP_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
    @fn void bswap_16( const int n , void *u ) 
    @brief swaps the bytes of a 16 bit array
@@ -53,5 +57,10 @@ bswap_32( const int n ,
 void
 bswap_64( const int n , 
 	  void *u ) ;
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
 
 #endif
