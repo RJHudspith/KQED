@@ -5,10 +5,14 @@ AM_PROG_CC_C_O
 AC_LANG([C]) 
 AC_PROG_RANLIB ## include a check for libtool if not use ranlib?
 AM_PROG_AR
-AC_C_BIGENDIAN 
+AC_C_BIGENDIAN
 
 ## SET up the m4
 AC_CONFIG_MACRO_DIR([m4])
+
+## Set up CUDA
+AX_CUDA
+AC_MSG_NOTICE([CUDA tools version $NVCC_VERSION])
 
 ## prefix!!
 AC_DEFINE_UNQUOTED([HAVE_PREFIX],["$prefix"],[Look for where we prefix to])
@@ -96,6 +100,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
 Makefile
 src/Makefile
+src_cuda/Makefile
 ])
 
 ## tell us what flags we are using
