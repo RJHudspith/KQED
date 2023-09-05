@@ -191,11 +191,11 @@ AC_ARG_WITH([cuda-fast-math],
 			want_fast_math="yes"
 		else
 			with_fast_math="$withval"
-			want_fast_math="yes"
+			want_fast_math="no"
 		fi
 	 ],
          [
-		want_fast_math="yes"
+		want_fast_math="no"
 	 ]
 )
 
