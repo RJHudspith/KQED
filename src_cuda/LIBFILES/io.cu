@@ -206,8 +206,8 @@ read_ff( struct Grid_coeffs *Grid )
     for( j = 0; j < Grid -> nstpx ; j++ ) {
       for( k = 0; k < Grid -> nstpy ; k++ ) {
         size_t ind = ((i * Grid -> nstpx + j) * Grid -> nstpy + k) * Grid -> nfx_max ;
-        memcpy( &Ffp_rect[ind], Ffp[i][j][k], Grid -> nfx_max * sizeof(float) ) ;
-        memcpy( &Ffm_rect[ind], Ffm[i][j][k], Grid -> nfx_max * sizeof(float) ) ;
+        memcpy( &Ffp_rect[ind], Ffp[i][j][k], nfx[j] * sizeof(float) ) ;
+        memcpy( &Ffm_rect[ind], Ffm[i][j][k], nfx[j] * sizeof(float) ) ;
         free( Ffp[i][j][k] ) ;
         free( Ffm[i][j][k] ) ;
       }
@@ -230,7 +230,7 @@ read_ff( struct Grid_coeffs *Grid )
   free( Ffm_rect );
 
   checkCudaErrors(cudaMemcpy(
-      Grid -> nfx, nfx, Grid -> Nffa * sizeof(int), cudaMemcpyHostToDevice )) ;
+      Grid -> nfx, nfx, Grid -> nstpx * sizeof( int ), cudaMemcpyHostToDevice )) ;
   free( nfx );
 
   return 0 ;
