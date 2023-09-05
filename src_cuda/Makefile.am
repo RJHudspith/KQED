@@ -35,6 +35,7 @@ include_HEADERS = \
 	$(LIBFILES:./LIBFILES/%.c=./HEADERS/%.h) \
 	$(UTILSFILES:./UTILS/%.c=./HEADERS/%.h) \
 	./HEADERS/KQED.h \
+	./HEADERS/cu_util.h \
 	../config.h
 
 if !PREF

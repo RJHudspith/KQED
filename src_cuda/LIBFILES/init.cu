@@ -3,6 +3,7 @@
    @brief a place where things are initialised
  */
 #include "KQED.h"
+#include "cu_util.h"
 
 #include "io.h"        // read_ff()
 #include "pi_pert.h"   // init_g8()

@@ -3,6 +3,7 @@
    @brief reading and writing stuff
  */
 #include "KQED.h"
+#include "cu_util.h"
 
 #include "crc32c.h"      // DML_checksum_accum
 #include "GLU_bswap.h"   // byte swaps if we are different endian to file format

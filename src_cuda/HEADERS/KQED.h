@@ -32,20 +32,6 @@ extern "C" {
 #endif
 
 // CUDA guards
-#ifdef __CUDA_ARCH__
-#include <cuda_runtime.h>
-#define checkCudaErrors(err) __checkCudaErrors(err, __FILE__, __LINE__)
-inline void __checkCudaErrors(cudaError err, const char *file, const int line) {
-  if (cudaSuccess != err) {
-    fprintf(stderr, "%s(%i) : CUDA Runtime API error %d: %s.\n", file, line,
-            (int)err, cudaGetErrorString(err));
-    exit(EXIT_FAILURE);
-  }
-}
-#else
-#define checkCudaErrors(err) err
-#endif
-
 #ifndef __device__
 #define __device__
 #endif
