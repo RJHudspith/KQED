@@ -3,126 +3,140 @@
    @brief computes the QED kernel
 */
 #include "KQED.h"      // definitions and what have you
+#include "cu_util.h"
+
+// need to wrap constant vec arguments to CUDA kernels in a struct so they are
+// passed by value (copied into constant global memory)
+struct Vec4 {
+  double x[4];
+};
+Vec4 vec4(const double xv[4]) {
+  Vec4 pt;
+  for (int i = 0; i < 4; ++i) {
+    pt.x[i] = xv[i];
+  }
+  return pt;
+}
 
 // single point-like evaluation kernels
 __global__
 void
 ker_pt_QED_kernel_L0(
-    const double xv[4] , const double yv[4] ,
+    const Vec4 xv , const Vec4 yv ,
     const struct QED_kernel_temps t , double *d_kerv ) {
-  QED_kernel_L0(xv, yv, t, (double (*)[4][4][4]) d_kerv);
+  QED_kernel_L0(xv.x, yv.x, t, (double (*)[4][4][4]) d_kerv);
 }
 __global__
 void
 ker_pt_QED_kernel_L1(
-    const double xv[4] , const double yv[4] ,
+    const Vec4 xv , const Vec4 yv ,
     const struct QED_kernel_temps t , double *d_kerv ) {
-  QED_kernel_L1(xv, yv, t, (double (*)[4][4][4]) d_kerv);
+  QED_kernel_L1(xv.x, yv.x, t, (double (*)[4][4][4]) d_kerv);
 }
 __global__
 void
 ker_pt_QED_kernel_L2(
-    const double xv[4] , const double yv[4] ,
+    const Vec4 xv , const Vec4 yv ,
     const struct QED_kernel_temps t , double *d_kerv ) {
-  QED_kernel_L2(xv, yv, t, (double (*)[4][4][4]) d_kerv);
+  QED_kernel_L2(xv.x, yv.x, t, (double (*)[4][4][4]) d_kerv);
 }
 __global__
 void
 ker_pt_QED_Mkernel_L2(
-    const double M, const double xv[4] , const double yv[4] ,
+    const double M, const Vec4 xv , const Vec4 yv ,
     const struct QED_kernel_temps t , double *d_kerv ) {
-  QED_Mkernel_L2(M, xv, yv, t, (double (*)[4][4][4]) d_kerv);
+  QED_Mkernel_L2(M, xv.x, yv.x, t, (double (*)[4][4][4]) d_kerv);
 }
 __global__
 void
 ker_pt_QED_kernel_L3(
-    const double xv[4] , const double yv[4] ,
+    const Vec4 xv , const Vec4 yv ,
     const struct QED_kernel_temps t , double *d_kerv ) {
-  QED_kernel_L3(xv, yv, t, (double (*)[4][4][4]) d_kerv);
+  QED_kernel_L3(xv.x, yv.x, t, (double (*)[4][4][4]) d_kerv);
 }
 __global__
 void
 ker_pt_compute_all_kernels(
-    const double xv[4], const double yv[4],
+    const Vec4 xv, const Vec4 yv,
     const struct QED_kernel_temps t, struct QED_Kernels *K) {
-  compute_all_kernels(xv, yv, t, K);
+  compute_all_kernels(xv.x, yv.x, t, K);
 }
 __global__
 void
 ker_pt_compute_all_kernels_SYMXY_v2(
-    const double xv[4], const double yv[4],
+    const Vec4 xv, const Vec4 yv,
     const struct QED_kernel_temps t, struct Kernels *K) {
-  compute_all_kernels_SYMXY_v2(xv, yv, t, K);
+  compute_all_kernels_SYMXY_v2(xv.x, yv.x, t, K);
 }
 __global__
 void
 ker_pt_compute_all_kernels_SYMXY(
-    const double xv[4], const double yv[4],
+    const Vec4 xv, const Vec4 yv,
     const struct QED_kernel_temps t, struct QED_Kernels *K) {
-  compute_all_kernels_SYMXY(xv, yv, t, K);
+  compute_all_kernels_SYMXY(xv.x, yv.x, t, K);
 }
 __global__
 void
 ker_pt_compute_all_kernels_SYMXY0_v2(
-    const double xv[4], const double yv[4],
+    const Vec4 xv, const Vec4 yv,
     const struct QED_kernel_temps t, struct Kernels *K) {
-  compute_all_kernels_SYMXY0_v2(xv, yv, t, K);
+  compute_all_kernels_SYMXY0_v2(xv.x, yv.x, t, K);
 }
 __global__
 void
 ker_pt_compute_all_kernels_SYMXY0(
-    const double xv[4], const double yv[4],
+    const Vec4 xv, const Vec4 yv,
     const struct QED_kernel_temps t, struct QED_Kernels *K) {
-  compute_all_kernels_SYMXY0(xv, yv, t, K);
+  compute_all_kernels_SYMXY0(xv.x, yv.x, t, K);
 }
 __global__
 void
 ker_pt_compute_all_Mkernels(
-    const double M[4], const double xv[4], const double yv[4],
+    const Vec4 M, const Vec4 xv, const Vec4 yv,
     const struct QED_kernel_temps t, struct QED_Kernels *K) {
-  compute_all_Mkernels(M, xv, yv, t, K);
+  compute_all_Mkernels(M.x, xv.x, yv.x, t, K);
 }
 __global__
 void
 ker_pt_compute_all_Mkernels_v2(
-    const double M[4], const double xv[4], const double yv[4],
+    const Vec4 M, const Vec4 xv, const Vec4 yv,
     const struct QED_kernel_temps t, struct QED_Kernels *K) {
-  compute_all_Mkernels_v2(M, xv, yv, t, K);
+  compute_all_Mkernels_v2(M.x, xv.x, yv.x, t, K);
 }
 __global__
 void
 ker_pt_compute_con_kernels(
-    const double xv[4], const double yv[4],
+    const Vec4 xv, const Vec4 yv,
     const struct QED_kernel_temps t, struct QED_Kernels *K) {
-  compute_con_kernels(xv, yv, t, K);
+  compute_con_kernels(xv.x, yv.x, t, K);
 }
 __global__
 void
 ker_pt_compute_con_kernels_v2(
-    const double xv[4], const double yv[4],
+    const Vec4 xv, const Vec4 yv,
     const struct QED_kernel_temps t, struct Kernels *K) {
-  compute_con_kernels_v2(xv, yv, t, K);
+  compute_con_kernels_v2(xv.x, yv.x, t, K);
 }
 __global__
 void
 ker_pt_compute_con_kernelsM_L2(
-    const double M[4], const double xv[4], const double yv[4],
+    const Vec4 M, const Vec4 xv, const Vec4 yv,
     const struct QED_kernel_temps t, struct Kernels *K) {
-  compute_con_kernelsM_L2(M, xv, yv, t, K);
+  compute_con_kernelsM_L2(M.x, xv.x, yv.x, t, K);
 }
 __global__
 void
 ker_pt_compute_sub_kernelsM_L2(
-    const double M[4], const double xv[4], const double yv[4],
+    const Vec4 M, const Vec4 xv, const Vec4 yv,
     const struct QED_kernel_temps t, struct Kernels *K) {
-  compute_sub_kernelsM_L2(M, xv, yv, t, K);
+  compute_sub_kernelsM_L2(M.x, xv.x, yv.x, t, K);
 }
 __global__
 void
 ker_pt_ipihatFermLoop_antisym(
-    const double xv[4], const double yv[4],
+    const Vec4 xv, const Vec4 yv,
     const struct QED_kernel_temps t, double *d_vpihat) {
-  ipihatFermLoop_antisym(xv, yv, t, (double (*)[4][4][4]) d_vpihat);
+  ipihatFermLoop_antisym(xv.x, yv.x, t, (double (*)[4][4][4]) d_vpihat);
 }
 
     
@@ -133,7 +147,7 @@ cu_pt_QED_kernel_L0(
   double *d_kerv;
   size_t sizeof_kerv = 6*4*4*4*sizeof(double);
   checkCudaErrors(cudaMalloc(&d_kerv, sizeof_kerv));
-  ker_pt_QED_kernel_L0<<<1,1>>>( xv, yv, t, d_kerv );
+  ker_pt_QED_kernel_L0<<<1,1>>>( vec4(xv), vec4(yv), t, d_kerv );
   checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_kerv));
 }
@@ -144,7 +158,7 @@ cu_pt_QED_kernel_L1(
   double *d_kerv;
   size_t sizeof_kerv = 6*4*4*4*sizeof(double);
   checkCudaErrors(cudaMalloc(&d_kerv, sizeof_kerv));
-  ker_pt_QED_kernel_L1<<<1,1>>>( xv, yv, t, d_kerv );
+  ker_pt_QED_kernel_L1<<<1,1>>>( vec4(xv), vec4(yv), t, d_kerv );
   checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_kerv));
 }
@@ -155,7 +169,7 @@ cu_pt_QED_kernel_L2(
   double *d_kerv;
   size_t sizeof_kerv = 6*4*4*4*sizeof(double);
   checkCudaErrors(cudaMalloc(&d_kerv, sizeof_kerv));
-  ker_pt_QED_kernel_L2<<<1,1>>>( xv, yv, t, d_kerv );
+  ker_pt_QED_kernel_L2<<<1,1>>>( vec4(xv), vec4(yv), t, d_kerv );
   checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_kerv));
 }
@@ -166,7 +180,7 @@ cu_pt_QED_Mkernel_L2(
   double *d_kerv;
   size_t sizeof_kerv = 6*4*4*4*sizeof(double);
   checkCudaErrors(cudaMalloc(&d_kerv, sizeof_kerv));
-  ker_pt_QED_Mkernel_L2<<<1,1>>>( M, xv, yv, t, d_kerv );
+  ker_pt_QED_Mkernel_L2<<<1,1>>>( M, vec4(xv), vec4(yv), t, d_kerv );
   checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_kerv));
 }
@@ -177,7 +191,7 @@ cu_pt_QED_kernel_L3(
   double *d_kerv;
   size_t sizeof_kerv = 6*4*4*4*sizeof(double);
   checkCudaErrors(cudaMalloc(&d_kerv, sizeof_kerv));
-  ker_pt_QED_kernel_L3<<<1,1>>>( xv, yv, t, d_kerv );
+  ker_pt_QED_kernel_L3<<<1,1>>>( vec4(xv), vec4(yv), t, d_kerv );
   checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_kerv));
 }
@@ -188,7 +202,7 @@ cu_pt_compute_all_kernels(
     const struct QED_kernel_temps t , struct QED_Kernels *K ) {
   struct QED_Kernels *d_K;
   checkCudaErrors(cudaMalloc(&d_K, sizeof(QED_Kernels)));
-  ker_pt_compute_all_kernels<<<1,1>>>( xv, yv, t, d_K );
+  ker_pt_compute_all_kernels<<<1,1>>>( vec4(xv), vec4(yv), t, d_K );
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
@@ -198,7 +212,7 @@ cu_pt_compute_all_kernels_SYMXY_v2(
     const struct QED_kernel_temps t , struct Kernels *K ) {
   struct Kernels *d_K;
   checkCudaErrors(cudaMalloc(&d_K, sizeof(Kernels)));
-  ker_pt_compute_all_kernels_SYMXY_v2<<<1,1>>>( xv, yv, t, d_K );
+  ker_pt_compute_all_kernels_SYMXY_v2<<<1,1>>>( vec4(xv), vec4(yv), t, d_K );
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
@@ -208,7 +222,7 @@ cu_pt_compute_all_kernels_SYMXY(
     const struct QED_kernel_temps t , struct QED_Kernels *K ) {
   struct QED_Kernels *d_K;
   checkCudaErrors(cudaMalloc(&d_K, sizeof(QED_Kernels)));
-  ker_pt_compute_all_kernels_SYMXY<<<1,1>>>( xv, yv, t, d_K );
+  ker_pt_compute_all_kernels_SYMXY<<<1,1>>>( vec4(xv), vec4(yv), t, d_K );
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
@@ -218,7 +232,7 @@ cu_pt_compute_all_kernels_SYMXY0_v2(
     const struct QED_kernel_temps t , struct Kernels *K ) {
   struct Kernels *d_K;
   checkCudaErrors(cudaMalloc(&d_K, sizeof(Kernels)));
-  ker_pt_compute_all_kernels_SYMXY0_v2<<<1,1>>>( xv, yv, t, d_K );
+  ker_pt_compute_all_kernels_SYMXY0_v2<<<1,1>>>( vec4(xv), vec4(yv), t, d_K );
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
@@ -228,7 +242,7 @@ cu_pt_compute_all_kernels_SYMXY0(
     const struct QED_kernel_temps t , struct QED_Kernels *K ) {
   struct QED_Kernels *d_K;
   checkCudaErrors(cudaMalloc(&d_K, sizeof(QED_Kernels)));
-  ker_pt_compute_all_kernels_SYMXY0<<<1,1>>>( xv, yv, t, d_K );
+  ker_pt_compute_all_kernels_SYMXY0<<<1,1>>>( vec4(xv), vec4(yv), t, d_K );
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
@@ -238,7 +252,7 @@ cu_pt_compute_all_Mkernels(
     const struct QED_kernel_temps t , struct QED_Kernels *K ) {
   struct QED_Kernels *d_K;
   checkCudaErrors(cudaMalloc(&d_K, sizeof(QED_Kernels)));
-  ker_pt_compute_all_Mkernels<<<1,1>>>( M, xv, yv, t, d_K );
+  ker_pt_compute_all_Mkernels<<<1,1>>>( vec4(M), vec4(xv), vec4(yv), t, d_K );
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
@@ -248,7 +262,7 @@ cu_pt_compute_all_Mkernels_v2(
     const struct QED_kernel_temps t , struct QED_Kernels *K ) {
   struct QED_Kernels *d_K;
   checkCudaErrors(cudaMalloc(&d_K, sizeof(QED_Kernels)));
-  ker_pt_compute_all_Mkernels_v2<<<1,1>>>( M, xv, yv, t, d_K );
+  ker_pt_compute_all_Mkernels_v2<<<1,1>>>( vec4(M), vec4(xv), vec4(yv), t, d_K );
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
@@ -258,7 +272,7 @@ cu_pt_compute_con_kernels(
     const struct QED_kernel_temps t , struct QED_Kernels *K ) {
   struct QED_Kernels *d_K;
   checkCudaErrors(cudaMalloc(&d_K, sizeof(QED_Kernels)));
-  ker_pt_compute_con_kernels<<<1,1>>>( xv, yv, t, d_K );
+  ker_pt_compute_con_kernels<<<1,1>>>( vec4(xv), vec4(yv), t, d_K );
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
@@ -268,7 +282,7 @@ cu_pt_compute_con_kernels_v2(
     const struct QED_kernel_temps t , struct Kernels *K ) {
   struct Kernels *d_K;
   checkCudaErrors(cudaMalloc(&d_K, sizeof(Kernels)));
-  ker_pt_compute_con_kernels_v2<<<1,1>>>( xv, yv, t, d_K );
+  ker_pt_compute_con_kernels_v2<<<1,1>>>( vec4(xv), vec4(yv), t, d_K );
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
@@ -278,7 +292,7 @@ cu_pt_compute_con_kernelsM_L2(
     const struct QED_kernel_temps t , struct Kernels *K ) {
   struct Kernels *d_K;
   checkCudaErrors(cudaMalloc(&d_K, sizeof(Kernels)));
-  ker_pt_compute_con_kernelsM_L2<<<1,1>>>( M, xv, yv, t, d_K );
+  ker_pt_compute_con_kernelsM_L2<<<1,1>>>( vec4(M), vec4(xv), vec4(yv), t, d_K );
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
@@ -288,7 +302,7 @@ cu_pt_compute_sub_kernelsM_L2(
     const struct QED_kernel_temps t , struct Kernels *K ) {
   struct Kernels *d_K;
   checkCudaErrors(cudaMalloc(&d_K, sizeof(Kernels)));
-  ker_pt_compute_sub_kernelsM_L2<<<1,1>>>( M, xv, yv, t, d_K );
+  ker_pt_compute_sub_kernelsM_L2<<<1,1>>>( vec4(M), vec4(xv), vec4(yv), t, d_K );
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
@@ -299,7 +313,7 @@ cu_pt_ipihatFermLoop_antisym(
   double *d_vpihat;
   size_t sizeof_vpihat = 6*4*4*4*sizeof(double);
   checkCudaErrors(cudaMalloc(&d_vpihat, sizeof_vpihat));
-  ker_pt_ipihatFermLoop_antisym<<<1,1>>>( xv, yv, t, d_vpihat );
+  ker_pt_ipihatFermLoop_antisym<<<1,1>>>( vec4(xv), vec4(yv), t, d_vpihat );
   checkCudaErrors(cudaMemcpy(vpihat, d_vpihat, sizeof_vpihat, cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_vpihat));
 }
