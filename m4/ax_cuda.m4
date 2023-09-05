@@ -88,7 +88,7 @@ then
 	# test if architecture is 64 bits and NVCC version >= 2.3
         libdir=lib
 	if test "x$host_cpu" = xx86_64 ; then
-	   if test "x$NVCC_VERSION" \> "x2.2" ; then
+	   if test -d "$cuda_home_path/lib64" ; then
               libdir=lib64
            fi
 	fi

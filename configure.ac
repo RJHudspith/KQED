@@ -6,6 +6,7 @@ AC_LANG([C])
 AC_PROG_RANLIB ## include a check for libtool if not use ranlib?
 AM_PROG_AR
 AC_C_BIGENDIAN
+AC_CANONICAL_HOST
 
 ## SET up the m4
 AC_CONFIG_MACRO_DIR([m4])
