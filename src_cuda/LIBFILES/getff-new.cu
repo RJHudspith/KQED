@@ -74,10 +74,11 @@ __device__
 static double Func_usm( const int i,
     const int n, const double x, const double *f ) {
   switch(i) {
-    case 0: chebUsum(n, x, f); break;
-    case 1: dchebUsum(n, x, f); break;
-    case 2: ddchebUsum(n, x, f); break;
-    case 3: dddchebUsum(n, x, f); break;
+    case 0: return chebUsum(n, x, f);
+    case 1: return dchebUsum(n, x, f);
+    case 2: return ddchebUsum(n, x, f);
+    case 3: return dddchebUsum(n, x, f);
+    default: return 0.0;
   }
 }
 
@@ -143,8 +144,6 @@ getff2( double res[2] ,
 
   res[1] = Func_usm(mm + ndcb, nf+mm, x , fvalD ) ;
   res[0] = ndy? res[1] : Func_usm(mm + ndcb, nf+mm, x , fval ) ;
-  free( fval );
-  free( fvalD );
 }
 
 // case where you have read in the weight functions upon initialization

@@ -80,7 +80,7 @@ QED_kernel_L0( const double xv[4] ,
   const bool y_is_zero  = is_zero( yv ) ;
 
   // set kernel to zero
-  memset( kerv , 0.0 , 384*sizeof( double ) ) ;
+  memset( kerv , 0 , 384*sizeof( double ) ) ;
   
   // do the logic
   if( x_is_zero && y_is_zero ) {
