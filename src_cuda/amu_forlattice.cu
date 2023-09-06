@@ -279,31 +279,31 @@ cu_pt_compute_con_kernels(
 void
 cu_pt_compute_con_kernels_v2(
     const double xv[4] , const double yv[4] ,
-    const struct QED_kernel_temps t , struct Kernels *K ) {
+    const struct QED_kernel_temps t , struct Kernels K[3] ) {
   struct Kernels *d_K;
-  checkCudaErrors(cudaMalloc(&d_K, sizeof(Kernels)));
+  checkCudaErrors(cudaMalloc(&d_K, 3*sizeof(Kernels)));
   ker_pt_compute_con_kernels_v2<<<1,1>>>( vec4(xv), vec4(yv), t, d_K );
-  checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaMemcpy(K, d_K, 3*sizeof(Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
 void
 cu_pt_compute_con_kernelsM_L2(
     const double M[4], const double xv[4] , const double yv[4] ,
-    const struct QED_kernel_temps t , struct Kernels *K ) {
+    const struct QED_kernel_temps t , struct Kernels K[3] ) {
   struct Kernels *d_K;
-  checkCudaErrors(cudaMalloc(&d_K, sizeof(Kernels)));
+  checkCudaErrors(cudaMalloc(&d_K, 3*sizeof(Kernels)));
   ker_pt_compute_con_kernelsM_L2<<<1,1>>>( vec4(M), vec4(xv), vec4(yv), t, d_K );
-  checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaMemcpy(K, d_K, 3*sizeof(Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
 void
 cu_pt_compute_sub_kernelsM_L2(
     const double M[4], const double xv[4] , const double yv[4] ,
-    const struct QED_kernel_temps t , struct Kernels *K ) {
+    const struct QED_kernel_temps t , struct Kernels K[3] ) {
   struct Kernels *d_K;
-  checkCudaErrors(cudaMalloc(&d_K, sizeof(Kernels)));
+  checkCudaErrors(cudaMalloc(&d_K, 3*sizeof(Kernels)));
   ker_pt_compute_sub_kernelsM_L2<<<1,1>>>( vec4(M), vec4(xv), vec4(yv), t, d_K );
-  checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaMemcpy(K, d_K, 3*sizeof(Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
 void
@@ -351,6 +351,13 @@ static void
 printbar( void )
 {
   fprintf( stdout , "\n-----------------------------------------------------\n" ) ;
+}
+
+static void
+print_header( int i )
+{
+  printbar() ;
+  fprintf( stdout , "=== EXAMPLE %d ===\n", i ) ;
 }
 
 // printing utility
@@ -413,7 +420,7 @@ example1( const struct QED_kernel_temps t )
     
 	const double *pi = (const double*)pihat ;
 	const double *kp = (const double*)kerv ;
-	register double tmp = 0.0;
+	double tmp = 0.0;
 	int idx ;
 	for( idx = 0 ; idx < 384 ; idx++ ) {
 	  tmp += *pi * ( *kp ) ;
@@ -664,6 +671,7 @@ example9( const struct QED_kernel_temps t )
       }
     }
   }
+  print_time() ;
   printbar() ;
 
   return ;
@@ -688,6 +696,7 @@ example10( const struct QED_kernel_temps t )
 
   print_kernels( (const double*)kerv1 , (const double*)kerv2 , file ) ;
 
+  print_time() ;
   fclose( file ) ;
 
   return ;
@@ -795,6 +804,8 @@ example12( const struct QED_kernel_temps t )
 
   printbar() ;
   fprintf( stdout , "Checking compute_all_kernels routine\n" ) ;
+
+  start_timer() ;
   
   size_t i , j ;
   double x[4] , y[4] ;
@@ -850,6 +861,7 @@ example12( const struct QED_kernel_temps t )
     }
   }
   printbar() ;
+  print_time() ;
   
   return ;
 }
@@ -863,6 +875,7 @@ example13( const struct QED_kernel_temps t )
   printbar() ;
   fprintf( stdout , "Checking compute_all_kernels_SYMXY routine\n" ) ;
 
+  start_timer() ;
   size_t X , Y ;
   double x[4] , y[4] ;
   for( X = 0 ; X < LVOLUME ; X++ ) {
@@ -906,6 +919,7 @@ example13( const struct QED_kernel_temps t )
     }
   }
   printbar() ;
+  print_time() ;
   return ;
 }
 
@@ -918,6 +932,7 @@ example14( const struct QED_kernel_temps t )
   printbar() ;
   fprintf( stdout , "Checking compute_all_kernels_SYMXY0 routine\n" ) ;
 
+  start_timer() ;
   size_t X , Y ;
   double x[4] , y[4] ;
   for( X = 0 ; X < LVOLUME ; X++ ) {
@@ -1000,6 +1015,7 @@ example14( const struct QED_kernel_temps t )
     }
   }
   printbar() ;
+  print_time() ;
   return ;
 }
 
@@ -1013,6 +1029,7 @@ example15( const struct QED_kernel_temps t )
   fprintf( stdout , "Testing L(x-y,0) == -L(y-x,0) && "
 	   "L(0,x-y) == L(0,y-x)\n" ) ;
 
+  start_timer() ;
   double k1[6][4][4][4] , k2[6][4][4][4] , k3[6][4][4][4] , k4[6][4][4][4] ;
   size_t X , Y ;
   double x[4] , y[4] ;
@@ -1052,6 +1069,7 @@ example15( const struct QED_kernel_temps t )
     }
   }
   printbar() ;
+  print_time() ;
   
   return ;
 }
@@ -1064,6 +1082,7 @@ example16( const struct QED_kernel_temps t )
   printbar() ;
   fprintf( stdout , "Checking again compute_all_kernels_SYMXY0 routine\n" ) ;
 
+  start_timer() ;
   size_t X , Y ;
   double x[4] , y[4] ;
   for( X = 0 ; X < LVOLUME ; X++ ) {
@@ -1084,7 +1103,7 @@ example16( const struct QED_kernel_temps t )
       cu_pt_compute_all_kernels_SYMXY0_v2( x , y , t , &K ) ;
       
       size_t i , j , k , l ;
-      register double L = 0 ;
+      double L = 0 ;
       for( i = 0 ; i < 6 ; i++ ) {
 	for( j = 0 ; j < 4 ; j++ ) {
 	  for( k = 0 ; k < 4 ; k++ ) {
@@ -1128,6 +1147,7 @@ example16( const struct QED_kernel_temps t )
     }
   }
   printbar() ;
+  print_time() ;
   
   return ;
 }
@@ -1140,6 +1160,7 @@ example17( const struct QED_kernel_temps t )
   printbar() ;
   fprintf( stdout , "Checking the con_kernels routine\n" ) ;
 
+  start_timer() ;
   size_t X , Y ;
   double x[4] , y[4] ;
   for( X = 0 ; X < LVOLUME ; X++ ) {
@@ -1157,7 +1178,7 @@ example17( const struct QED_kernel_temps t )
       cu_pt_compute_all_kernels( x , xmy , t , &K3 ) ;
       
       size_t i , j , k , l ;
-      register double L = 0 ;
+      double L = 0 ;
       for( i = 0 ; i < 6 ; i++ ) {
 	for( j = 0 ; j < 4 ; j++ ) {
 	  for( k = 0 ; k < 4 ; k++ ) {
@@ -1221,6 +1242,7 @@ example17( const struct QED_kernel_temps t )
     }
   }
   printbar() ;
+  print_time() ;
   
   return ;
 }
@@ -1233,6 +1255,7 @@ example18( const struct QED_kernel_temps t )
   fprintf( stdout , "Checking the con_kernels routine\n" ) ;
 
 
+  start_timer() ;
   size_t X , Y ;
   double x[4] , y[4] ;
   for( X = 0 ; X < LVOLUME ; X++ ) {
@@ -1251,7 +1274,7 @@ example18( const struct QED_kernel_temps t )
       cu_pt_compute_all_kernels( x , xmy , t , &K3 ) ;
       
       size_t i , j , k , l ;
-      register double L = 0 ;
+      double L = 0 ;
       for( i = 0 ; i < 6 ; i++ ) {
 	for( j = 0 ; j < 4 ; j++ ) {
 	  for( k = 0 ; k < 4 ; k++ ) {
@@ -1322,6 +1345,7 @@ example18( const struct QED_kernel_temps t )
     }
   }
   printbar() ;
+  print_time() ;
   
   return ;
 }
@@ -1332,7 +1356,8 @@ example19( const struct QED_kernel_temps t )
 {
   printbar() ;
   fprintf( stdout , "Checking the swap_munu_Lyx routine\n" ) ;
-  
+
+  start_timer() ;
   size_t i , j , rhosig , mu , nu , lambda ;
   double x[4] , y[4] ;
   for( i = 0 ; i < LVOLUME ; i++ ) {
@@ -1345,7 +1370,7 @@ example19( const struct QED_kernel_temps t )
       cu_pt_compute_all_kernels( x , y , t , &K3 ) ;
       swap_munu_Lyx( &K3 ) ;
       
-      register double L = 0 ;
+      double L = 0 ;
       for( rhosig = 0 ; rhosig < 6 ; rhosig++ ) {
 	for( mu = 0 ; mu < 4 ; mu++ ) {
 	  for( nu = 0 ; nu < 4 ; nu++ ) {
@@ -1389,6 +1414,7 @@ example19( const struct QED_kernel_temps t )
     }
   }
   printbar() ;
+  print_time() ;
   return ;
 }
 
@@ -1399,6 +1425,7 @@ example20( const struct QED_kernel_temps t )
   printbar() ;
   fprintf( stdout , "Checking the compute_con_kernelsM_L2\n" ) ;
 
+  start_timer() ;
   double x[4] , y[4] ; 
   size_t i , j , rhosig , mu , nu , lambda ;
   for( i = 0 ; i < LVOLUME ; i++ ) {
@@ -1468,6 +1495,7 @@ example20( const struct QED_kernel_temps t )
       }
     }
   }
+  print_time() ;
   return ;
 }
 
@@ -1478,6 +1506,7 @@ example21( const struct QED_kernel_temps t )
   printbar() ;
   fprintf( stdout , "Checking the compute_all_Mkernels routine\n" ) ;
 
+  start_timer() ;
   double x[4] , y[4] ; 
   size_t i , j , rhosig , mu , nu , lambda ;
   for( i = 0 ; i < LVOLUME ; i++ ) {
@@ -1541,6 +1570,7 @@ example21( const struct QED_kernel_temps t )
     }
   }
   printbar() ;
+  print_time() ;
   return ;
 }
 
@@ -1549,6 +1579,7 @@ static void
 example22( const struct QED_kernel_temps t )
 {
   printbar() ;
+  start_timer() ;
   fprintf( stdout , "Testing for thread safety\n" ) ;
 #if (defined HAVE_OMP_H)
   const double x[4] = { 1 , 2 , 3 , 4 }, y[4] = { 1 , 2 , 2 , 2 } ; 
@@ -1567,6 +1598,7 @@ example22( const struct QED_kernel_temps t )
     fclose( file ) ;
   }
 #endif
+  print_time() ;
   return ;
 }
 
@@ -1576,6 +1608,7 @@ example23( const struct QED_kernel_temps t )
   printbar() ;
   fprintf( stdout , "Checking the compute_all_Mkernels_v2 routine\n" ) ;
 
+  start_timer() ;
   double x[4] , y[4] ; 
   size_t i , j , rhosig , mu , nu , lambda ;
   for( i = 0 ; i < LVOLUME ; i++ ) {
@@ -1626,6 +1659,7 @@ example23( const struct QED_kernel_temps t )
       //
     }
   }
+  print_time() ;
   
   return ;
 }
@@ -1637,6 +1671,7 @@ example24( const struct QED_kernel_temps t )
   printbar() ;
   fprintf( stdout , "Checking the compute_sub_kernelsM_L2\n" ) ;
 
+  start_timer() ;
   double x[4] , y[4] ; 
   size_t i , j , rhosig , mu , nu , lambda ;
   for( i = 0 ; i < LVOLUME ; i++ ) {
@@ -1709,6 +1744,7 @@ example24( const struct QED_kernel_temps t )
       }
     }
   }
+  print_time() ;
   return ;
 }
 
@@ -1762,53 +1798,80 @@ main( void )
   
   print_time() ;
 
+  print_header( 1 ) ;
   example1( t ) ;
 
+  print_header( 2 ) ;
   example2( t ) ;
 
+  print_header( 3 ) ;
   example3( t ) ;
 
+  print_header( 4 ) ;
   example4( t ) ;
 
+  print_header( 5 ) ;
   example5( t ) ;
 
+  print_header( 6 ) ;
   example6( t ) ;
 
+  print_header( 7 ) ;
   example7( t ) ;
   
+  print_header( 9 ) ;
   example9( t ) ;
 
+  print_header( 10 ) ;
   example10( t ) ;
 
+  print_header( 11 ) ;
   example11( t ) ;
 
+  print_header( 12 ) ;
   example12( t ) ;
 
+  print_header( 13 ) ;
   example13( t ) ;
 
+  print_header( 14 ) ;
   example14( t ) ;
 
+  print_header( 15 ) ;
   example15( t ) ;
 
+  print_header( 16 ) ;
   example16( t ) ;
 
+  print_header( 17 ) ;
   example17( t ) ;
 
+  print_header( 18 ) ;
   example18( t ) ;
 
+  print_header( 19 ) ;
   example19( t ) ;
 
+  print_header( 20 ) ;
   example20( t ) ;
 
+  print_header( 21 ) ;
   example21( t ) ;
 
-  example22( t ) ;
+  // SKIP: Testing thread safety
+  // print_header( 22 ) ;
+  // example22( t ) ;
 
+  print_header( 23 ) ;
   example23( t ) ;
   
+  print_header( 24 ) ;
   example24( t ) ;
 
-  stress_test( t ) ;
+  // SKIP: Need to reformulate appropriately for GPU to stress test
+  // printbar() ;
+  // fprintf( stdout , "=== STRESS TEST ===\n" ) ;
+  // stress_test( t ) ;
 
  memfree :
   
