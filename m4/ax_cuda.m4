@@ -86,10 +86,10 @@ then
 	AC_MSG_RESULT([nvcc version : $NVCC_VERSION])
 	
 	# test if architecture is 64 bits and NVCC version >= 2.3
-        libdir=lib
+        cuda_libdir=lib
 	if test "x$host_cpu" = xx86_64 ; then
 	   if test -d "$cuda_home_path/lib64" ; then
-              libdir=lib64
+              cuda_libdir=lib64
            fi
 	fi
 
@@ -97,10 +97,10 @@ then
 	if test -n "$cuda_home_path"
 	then
 	    CUDA_CFLAGS="-I$cuda_home_path/include"
-	    CUDA_LIBS="-L$cuda_home_path/$libdir -lcudart"
+	    CUDA_LIBS="-L$cuda_home_path/$cuda_libdir -lcudart"
 	else
 	    CUDA_CFLAGS="-I/usr/local/cuda/include"
-	    CUDA_LIBS="-L/usr/local/cuda/$libdir -lcudart"
+	    CUDA_LIBS="-L/usr/local/cuda/$cuda_libdir -lcudart"
 	fi
 
 	# Env var CUDA_DRIVER_LIB_PATH can be used to set an alternate driver library path

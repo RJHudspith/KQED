@@ -32,7 +32,7 @@ libKQED_cuda_a_CFLAGS = $(CUDA_CFLAGS) $(INCLUDES) $(CFLAGS)
 
 ## and their respective headers
 include_HEADERS = \
-	$(LIBFILES:./LIBFILES/%.c=./HEADERS/%.h) \
+	$(LIBFILES:./LIBFILES/%.cu=./HEADERS/%.h) \
 	$(UTILSFILES:./UTILS/%.c=./HEADERS/%.h) \
 	./HEADERS/KQED.h \
 	./HEADERS/cu_util.h \
