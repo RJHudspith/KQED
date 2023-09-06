@@ -5,9 +5,11 @@
 #include "KQED.h"      // definitions and what have you
 #include "cu_util.h"
 
+#include <vector>
+
 // need to wrap constant vec arguments to CUDA kernels in a struct so they are
 // passed by value (copied into constant global memory)
-struct Vec4 {
+struct __attribute__((packed, aligned(8))) Vec4 {
   double x[4];
 };
 Vec4 vec4(const double xv[4]) {
@@ -17,14 +19,21 @@ Vec4 vec4(const double xv[4]) {
   }
   return pt;
 }
+struct __attribute__((packed, aligned(8))) OneKernel {
+  double k[6][4][4][4] ;
+};
+
+#define CUDA_BLOCK_SIZE 32
 
 // single point-like evaluation kernels
 __global__
 void
-ker_pt_QED_kernel_L0(
-    const Vec4 xv , const Vec4 yv ,
-    const struct QED_kernel_temps t , double *d_kerv ) {
-  QED_kernel_L0(xv.x, yv.x, t, (double (*)[4][4][4]) d_kerv);
+ker_QED_kernel_L0(
+    const Vec4 *d_xv, const Vec4 *d_yv, unsigned n,
+    const struct QED_kernel_temps t, OneKernel *d_kerv ) {
+  unsigned i = blockIdx.x * blockDim.x + threadIdx.x;
+  if (i >= n) return;
+  QED_kernel_L0(d_xv[i].x, d_yv[i].x, t, (double (*)[4][4][4]) &d_kerv[i].k);
 }
 __global__
 void
@@ -138,17 +147,54 @@ ker_pt_ipihatFermLoop_antisym(
     const struct QED_kernel_temps t, double *d_vpihat) {
   ipihatFermLoop_antisym(xv.x, yv.x, t, (double (*)[4][4][4]) d_vpihat);
 }
+__global__
+void
+ker_ipihatFermLoop_antisym(
+    const Vec4 *d_xv, const Vec4 *d_yv, unsigned n,
+    const struct QED_kernel_temps t, OneKernel *d_vpihat) {
+  unsigned i = blockIdx.x * blockDim.x + threadIdx.x;
+  if (i >= n) return;
+  ipihatFermLoop_antisym(d_xv[i].x, d_yv[i].x, t, (double (*)[4][4][4]) &d_vpihat[i].k);
+}
 
     
 void
 cu_pt_QED_kernel_L0(
     const double xv[4] , const double yv[4] ,
     const struct QED_kernel_temps t , double kerv[6][4][4][4] ) {
-  double *d_kerv;
+  // double *d_kerv;
+  OneKernel *d_kerv;
   size_t sizeof_kerv = 6*4*4*4*sizeof(double);
   checkCudaErrors(cudaMalloc(&d_kerv, sizeof_kerv));
-  ker_pt_QED_kernel_L0<<<1,1>>>( vec4(xv), vec4(yv), t, d_kerv );
+  Vec4 *d_xv, *d_yv;
+  checkCudaErrors(cudaMalloc(&d_xv, sizeof(Vec4)));
+  checkCudaErrors(cudaMalloc(&d_yv, sizeof(Vec4)));
+  checkCudaErrors(cudaMemcpy(d_xv, xv, sizeof(Vec4), cudaMemcpyHostToDevice));
+  checkCudaErrors(cudaMemcpy(d_yv, yv, sizeof(Vec4), cudaMemcpyHostToDevice));
+  ker_QED_kernel_L0<<<1,1>>>( d_xv, d_yv, 1, t, d_kerv );
   checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_kerv));
+  checkCudaErrors(cudaFree(d_xv));
+  checkCudaErrors(cudaFree(d_yv));
+}
+void
+cu_arr_QED_kernel_L0(
+    const Vec4 *xv, const Vec4 *yv, const unsigned n,
+    const struct QED_kernel_temps t , OneKernel *kerv ) {
+  Vec4 *d_xv, *d_yv;
+  checkCudaErrors(cudaMalloc(&d_xv, n*sizeof(Vec4)));
+  checkCudaErrors(cudaMalloc(&d_yv, n*sizeof(Vec4)));
+  checkCudaErrors(cudaMemcpy(d_xv, xv, n*sizeof(Vec4), cudaMemcpyHostToDevice));
+  checkCudaErrors(cudaMemcpy(d_yv, yv, n*sizeof(Vec4), cudaMemcpyHostToDevice));
+  OneKernel *d_kerv;
+  size_t sizeof_kerv = n*sizeof(OneKernel);
+  checkCudaErrors(cudaMalloc(&d_kerv, sizeof_kerv));
+  unsigned n_threads = CUDA_BLOCK_SIZE;
+  unsigned n_blocks = (n + n_threads - 1) / n_threads;
+  ker_QED_kernel_L0<<<n_blocks,n_threads>>>(d_xv, d_yv, n, t, d_kerv);
+  checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_xv));
+  checkCudaErrors(cudaFree(d_yv));
   checkCudaErrors(cudaFree(d_kerv));
 }
 void
@@ -307,14 +353,23 @@ cu_pt_compute_sub_kernelsM_L2(
   checkCudaErrors(cudaFree(d_K));
 }
 void
-cu_pt_ipihatFermLoop_antisym(
-    const double xv[4] , const double yv[4] ,
-    const struct QED_kernel_temps t , double vpihat[6][4][4][4] ) {
-  double *d_vpihat;
-  size_t sizeof_vpihat = 6*4*4*4*sizeof(double);
+cu_arr_ipihatFermLoop_antisym(
+    const Vec4 *xv , const Vec4 *yv , const unsigned n ,
+    const struct QED_kernel_temps t , OneKernel *vpihat ) {
+  Vec4 *d_xv, *d_yv;
+  checkCudaErrors(cudaMalloc(&d_xv, n*sizeof(Vec4)));
+  checkCudaErrors(cudaMalloc(&d_yv, n*sizeof(Vec4)));
+  checkCudaErrors(cudaMemcpy(d_xv, xv, n*sizeof(Vec4), cudaMemcpyHostToDevice));
+  checkCudaErrors(cudaMemcpy(d_yv, yv, n*sizeof(Vec4), cudaMemcpyHostToDevice));
+  OneKernel *d_vpihat;
+  size_t sizeof_vpihat = n*sizeof(OneKernel);
   checkCudaErrors(cudaMalloc(&d_vpihat, sizeof_vpihat));
-  ker_pt_ipihatFermLoop_antisym<<<1,1>>>( vec4(xv), vec4(yv), t, d_vpihat );
+  unsigned n_threads = CUDA_BLOCK_SIZE;
+  unsigned n_blocks = (n + n_threads - 1) / n_threads;
+  ker_ipihatFermLoop_antisym<<<n_blocks,n_threads>>>( d_xv, d_yv, n, t, d_vpihat );
   checkCudaErrors(cudaMemcpy(vpihat, d_vpihat, sizeof_vpihat, cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaFree(d_xv));
+  checkCudaErrors(cudaFree(d_yv));
   checkCudaErrors(cudaFree(d_vpihat));
 }
 
@@ -393,10 +448,9 @@ example1( const struct QED_kernel_temps t )
   const double norm_fermloop = pow(1.0,4);
   const double fnorm = 2.0*pref*convf*norm_fermloop ;
 
-  double kerv[6][4][4][4] KQED_ALIGN ;
-  double pihat[6][4][4][4] KQED_ALIGN ;
-
   start_timer() ;
+
+  std::vector<Vec4> xvs, yvs, xvMvs, yvMvs;
   
   double x,y,z ;
   for( x = 0.005 ; x < 1 ; x += 0.2 ) {
@@ -410,16 +464,35 @@ example1( const struct QED_kernel_temps t )
     
 	const double xv[4] = { 0 , 0 , vi[0]*si , vi[0]*co } ;
     	const double yv[4] = { 0 , 0 , 0 , vi[2] } ;
-	
+
 	const double yvMv[4] = { 0 , 0 , 0 , vi[2]*Mv } ; 
 	const double xvMv[4] = { 0 , 0 , vi[0]*si*Mv , vi[0]*co*Mv } ;
-    
-	cu_pt_QED_kernel_L0( xv, yv, t, kerv ) ;
-    
-	cu_pt_ipihatFermLoop_antisym( xvMv, yvMv, t, pihat );
-    
-	const double *pi = (const double*)pihat ;
-	const double *kp = (const double*)kerv ;
+
+        xvs.push_back(vec4(xv));
+        yvs.push_back(vec4(yv));
+        xvMvs.push_back(vec4(xvMv));
+        yvMvs.push_back(vec4(yvMv));
+      }
+    }
+  }
+
+  std::vector<OneKernel> kervs(xvs.size());
+  std::vector<OneKernel> pihats(xvs.size());
+  cu_arr_QED_kernel_L0(
+      xvs.data(), yvs.data(), xvs.size(), t, kervs.data());
+  cu_arr_ipihatFermLoop_antisym(
+      xvMvs.data(), yvMvs.data(), xvs.size(), t, pihats.data());
+
+  unsigned i = 0;
+  for( x = 0.005 ; x < 1 ; x += 0.2 ) {
+    for( y = 0.005 ; y < M_PI ; y += M_PI/4. ) {
+      for( z = 0.005 ; z < 1 ; z += 0.2 ) { 
+
+	const double vi[3] = { x , y , z } ;
+	const double si = sin(vi[1]);
+
+	const double *pi = (const double*)&pihats[i].k ;
+	const double *kp = (const double*)&kervs[i].k ;
 	double tmp = 0.0;
 	int idx ;
 	for( idx = 0 ; idx < 384 ; idx++ ) {
@@ -429,6 +502,8 @@ example1( const struct QED_kernel_temps t )
 	tmp *= fnorm;
 	fprintf( stdout , "x= %lf beta= %lf  y= %lf  iPihat*L_QED= %.11lg\n",
 		 vi[0], vi[1], vi[2], 2*pow(vi[0],3.0)*pow(vi[2],4.0)*si*si*tmp);
+
+        i++;
       }
     }
   }
