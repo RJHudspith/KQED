@@ -7,15 +7,16 @@ lib_LIBRARIES = libKQED_cuda.a
 # AM_CFLAGS=-I${TOPDIR}/src_cuda/HEADERS/
 AM_CPPFLAGS=-I./HEADERS/
 
-LIBFILES=./LIBFILES/all_kernels.cu \
-	./LIBFILES/cheby.cu ./LIBFILES/chnr_dV.cu ./LIBFILES/chnr_dS.cu \
-	./LIBFILES/chnr_dT.cu ./LIBFILES/con_kernel.cu \
-	./LIBFILES/getff-new.cu ./LIBFILES/init.cu \
-	./LIBFILES/io.cu ./LIBFILES/kernels.cu ./LIBFILES/pi_pert.cu \
-	./LIBFILES/QED_kernel.cu ./LIBFILES/QED_kernel_xy0.cu \
-	./LIBFILES/SYMXY.cu ./LIBFILES/SYMXY0.cu \
-	./LIBFILES/Tabd.cu \
-        ./LIBFILES/sub_kernel.cu
+# LIBFILES=./LIBFILES/all_kernels.cu \
+# 	./LIBFILES/cheby.cu ./LIBFILES/chnr_dV.cu ./LIBFILES/chnr_dS.cu \
+# 	./LIBFILES/chnr_dT.cu ./LIBFILES/con_kernel.cu \
+# 	./LIBFILES/getff-new.cu ./LIBFILES/init.cu \
+# 	./LIBFILES/io.cu ./LIBFILES/kernels.cu ./LIBFILES/pi_pert.cu \
+# 	./LIBFILES/QED_kernel.cu ./LIBFILES/QED_kernel_xy0.cu \
+# 	./LIBFILES/SYMXY.cu ./LIBFILES/SYMXY0.cu \
+# 	./LIBFILES/Tabd.cu \
+#         ./LIBFILES/sub_kernel.cu
+LIBFILES=./LIBFILES/KQED.cu
 
 UTILSFILES=./UTILS/GLU_timer.c ./UTILS/GLU_bswap.c ./UTILS/crc32c.c
 
@@ -26,9 +27,13 @@ libKQED_cuda_a_LIBADD = $(CUDA_LIBS)
 libKQED_cuda_a_CFLAGS = $(CUDA_CFLAGS) $(INCLUDES) $(CFLAGS)
 
 .cu.o:
-	$(NVCC) $(NVCCFLAGS) $(INCLUDES) $(DEFS) $(DEFAULT_INCLUDES) $(CFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -dc -o $@ $<
+	$(NVCC) $(NVCCFLAGS) $(INCLUDES) $(DEFS) $(DEFAULT_INCLUDES) \
+	--compiler-options="$(CFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS)" \
+	-dc -o $@ $<
 .c.o:
-	$(NVCC) -x cu $(NVCCFLAGS) $(INCLUDES) $(DEFS) $(DEFAULT_INCLUDES) $(CFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -dc -o $@ $<
+	$(NVCC) -x cu $(NVCCFLAGS) $(INCLUDES) $(DEFS) $(DEFAULT_INCLUDES) \
+	--compiler-options="$(CFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS)" \
+	-dc -o $@ $<
 
 ## and their respective headers
 include_HEADERS = \
@@ -47,7 +52,7 @@ bin_PROGRAMS = KQED_CUDA
 KQED_CUDA_SOURCES = amu_forlattice.cu
 KQED_CUDA_CFLAGS = $(CUDA_CFLAGS) $(INCLUDES) $(CFLAGS)
 KQED_CUDA_LDADD = libKQED_cuda.a ${LDFLAGS} -lm $(CUDA_LIBS) $(CUDA_LDFLAGS) -lcudart
-KQED_CUDA_LINK = $(NVCC) $(NVCCFLAGS) $(KQED_CUDA_CFLAGS) $(KQED_CUDA_LDFLAGS) $(LDFLAGS) -o $@
+KQED_CUDA_LINK = $(NVCC) $(NVCCFLAGS) --compiler-options="$(KQED_CUDA_CFLAGS)" $(KQED_CUDA_LDFLAGS) $(LDFLAGS) -o $@
 
 endif
 
