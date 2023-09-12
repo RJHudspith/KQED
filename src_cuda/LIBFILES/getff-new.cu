@@ -22,7 +22,7 @@ interpol3( const double y ,
 }
 
 // precompute all this business for x or y
-__device__
+__device__ KQED_PRIVATE
 void
 precompute_INV( struct intprecomp *INVy ,
 		const double y ,
@@ -45,8 +45,8 @@ precompute_INV( struct intprecomp *INVy ,
 }
 
 // precompute all this business for x
-__device__
-  void
+__device__ KQED_PRIVATE
+void
 precompute_INVx( struct intprecomp *INVx ,
     const double y ,
     const double y1 ,
@@ -68,8 +68,8 @@ interpol4( const struct intprecomp INVx ,
 }
 
 // function pointer for cheby stuff
-// static double (*Func_usm[4])( const int , const double , const double *) = \
-{ chebUsum , dchebUsum , ddchebUsum , dddchebUsum } ;
+// static double (*Func_usm[4])( const int , const double , const double *) =
+// { chebUsum , dchebUsum , ddchebUsum , dddchebUsum } ;
 __device__
 static double Func_usm( const int i,
     const int n, const double x, const double *f ) {
@@ -148,7 +148,7 @@ getff2( double res[2] ,
 
 // case where you have read in the weight functions upon initialization
 // interpolates the form factor[nm] to the target point y using the grid
-__device__
+__device__ KQED_PRIVATE
 double
 accessv( const bool flag_hy, const bool use_y_derivs,
 	 const int ix, const int iy,
@@ -219,7 +219,7 @@ lsrch( const double *arr, const double target,
 // returns the lower index that bounds "target"
 // e.g arr[lo] < target < arr[lo+1]
 // (assumes a monotonically increasing arr)
-__device__
+__device__ KQED_PRIVATE
 int
 find_ind(const double *arr, const double target,
     const int lo, const int hi) {
@@ -230,7 +230,7 @@ find_ind(const double *arr, const double target,
 }
 
 // extract the form factor
-__device__
+__device__ KQED_PRIVATE
 double
 extractff( const FFidx nm, const bool ndy, const NDCB ndcb,
 	   const struct invariants Inv , const struct Grid_coeffs Grid )
@@ -266,7 +266,7 @@ extractff( const FFidx nm, const bool ndy, const NDCB ndcb,
 }
 
 // extract the form factor
-__device__
+__device__ KQED_PRIVATE
 void
 extractff2( const FFidx nm,
 	    const NDCB ndcb,
@@ -292,7 +292,7 @@ extractff2( const FFidx nm,
 }
 
 // Initialises the invariants used in chnr_*
-__device__
+__device__ KQED_PRIVATE
 struct invariants
 set_invariants( const double xv[4] ,
 		const double yv[4] ,

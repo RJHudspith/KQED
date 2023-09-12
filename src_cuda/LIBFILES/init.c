@@ -11,7 +11,6 @@
 // set the Grid struct and all the grid information e.g. XX,YY.
 // this includes uploading grid info to GPU, though Grid is still a host struct
 // wrapping the device ptrs.
-__host__
 static int
 set_grid( struct Grid_coeffs *Grid )
 {  
@@ -75,7 +74,6 @@ free_QED_temps( struct QED_kernel_temps *t )
 }
 
 // returns 1 if it messes up, returns 0 otherwise
-__host__
 int
 initialise( struct QED_kernel_temps *t )
 {

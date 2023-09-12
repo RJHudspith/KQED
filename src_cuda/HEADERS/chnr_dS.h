@@ -3,7 +3,7 @@
 
 // sets dyv[bet]= \partial^(y)_\beta < I >_epsilon
 // sets dxv[bet]= \partial^(x)_\beta < I >_epsilon
-__device__
+__device__ KQED_PRIVATE
 int
 chnr_dS( const double xv[4] ,
 	 const double yv[4] ,

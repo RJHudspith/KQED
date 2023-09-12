@@ -12,7 +12,6 @@
 #define FILE_TAYLORX "/PRECOMP/taylorx_cksum.bin"
 #define FILE_TAYLORY "/PRECOMP/taylory_cksum.bin" 
 
-__host__
 static int
 FREAD32( void *p , const size_t size , const size_t length , FILE *f )
 {
@@ -26,7 +25,6 @@ FREAD32( void *p , const size_t size , const size_t length , FILE *f )
   return 0 ;
 }
 
-__host__
 static int
 FREAD64( void *p , const size_t size , const size_t length , FILE *f )
 {
@@ -41,7 +39,6 @@ FREAD64( void *p , const size_t size , const size_t length , FILE *f )
 }
 
 // read the (single-precision) binary file allocating Grid objects
-__host__
 int
 read_ff( struct Grid_coeffs *Grid )
 {

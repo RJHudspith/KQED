@@ -221,7 +221,7 @@ AC_MSG_NOTICE([target gpu architecture is sm$target_arch])
 
 # Default nvcc flags
 NVCCFLAGS=" -ccbin $CC"
-NVCCFLAGS+=" -dlto -arch=sm_$target_arch"
+NVCCFLAGS+=" -arch=sm_$target_arch"
 
 if test x$want_fast_math = xyes
 then

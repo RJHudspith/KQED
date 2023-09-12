@@ -151,7 +151,7 @@ XMYSWAP_T_contrib( struct ttmps *T ,
 // set dyv[alf][bet][dta]= \partial^(y)_\beta <(epsilon_alf epsilon_dta - 1/4 delta_{alf dta}) I>_epsilon
 // and dxv[alf][bet][dta]= \partial^(x)_\beta <(epsilon_alf epsilon_dta - 1/4 delta_{alf dta}) I>_epsilon
 __device__
-int
+int KQED_PRIVATE
 chnr_dT( const double xv[4] ,
 	 const double yv[4] ,
 	 const struct invariants Inv ,

@@ -17,7 +17,7 @@ static const double dlta[4][4] = { { 1 , 0 , 0 , 0 } ,
 				   { 0 , 0 , 0 , 1 } } ;
 
 // Taylor expanded versions for x == 0
-__device__
+__device__ KQED_PRIVATE
 int
 Tabd_xeq0( const double yv[4] ,
 	   const struct Grid_coeffs Grid ,
@@ -108,7 +108,7 @@ Tabd_xeq0( const double yv[4] ,
 }
 
 // Taylor expansions around y = 0
-__device__
+__device__ KQED_PRIVATE
 int
 Tabd_yeq0( const double xv[4] ,
 	   const struct Grid_coeffs Grid ,

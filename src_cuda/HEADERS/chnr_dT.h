@@ -3,7 +3,7 @@
 
 // set dyv[alf][bet][dta]= \partial^(y)_\beta <(epsilon_alf epsilon_dta - 1/4 delta_{alf dta}) I>_epsilon
 // and dxv[alf][bet][dta]= \partial^(x)_\beta <(epsilon_alf epsilon_dta - 1/4 delta_{alf dta}) I>_epsilon
-__device__
+__device__ KQED_PRIVATE
 int
 chnr_dT( const double xv[4] ,
 	 const double yv[4] ,

@@ -12,6 +12,7 @@
 struct __attribute__((packed, aligned(8))) Vec4 {
   double x[4];
 };
+__host__
 Vec4 vec4(const double xv[4]) {
   Vec4 pt;
   for (int i = 0; i < 4; ++i) {
@@ -157,7 +158,8 @@ ker_ipihatFermLoop_antisym(
   ipihatFermLoop_antisym(d_xv[i].x, d_yv[i].x, t, (double (*)[4][4][4]) &d_vpihat[i].k);
 }
 
-    
+
+__host__
 void
 cu_pt_QED_kernel_L0(
     const double xv[4] , const double yv[4] ,
@@ -177,6 +179,7 @@ cu_pt_QED_kernel_L0(
   checkCudaErrors(cudaFree(d_xv));
   checkCudaErrors(cudaFree(d_yv));
 }
+__host__
 void
 cu_arr_QED_kernel_L0(
     const Vec4 *xv, const Vec4 *yv, const unsigned n,
@@ -197,6 +200,7 @@ cu_arr_QED_kernel_L0(
   checkCudaErrors(cudaFree(d_yv));
   checkCudaErrors(cudaFree(d_kerv));
 }
+__host__
 void
 cu_pt_QED_kernel_L1(
     const double xv[4] , const double yv[4] ,
@@ -208,6 +212,7 @@ cu_pt_QED_kernel_L1(
   checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_kerv));
 }
+__host__
 void
 cu_pt_QED_kernel_L2(
     const double xv[4] , const double yv[4] ,
@@ -219,6 +224,7 @@ cu_pt_QED_kernel_L2(
   checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_kerv));
 }
+__host__
 void
 cu_pt_QED_Mkernel_L2(
     const double M, const double xv[4] , const double yv[4] ,
@@ -230,6 +236,7 @@ cu_pt_QED_Mkernel_L2(
   checkCudaErrors(cudaMemcpy(kerv, d_kerv, sizeof_kerv, cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_kerv));
 }
+__host__
 void
 cu_pt_QED_kernel_L3(
     const double xv[4] , const double yv[4] ,
@@ -242,6 +249,7 @@ cu_pt_QED_kernel_L3(
   checkCudaErrors(cudaFree(d_kerv));
 }
 
+__host__
 void
 cu_pt_compute_all_kernels(
     const double xv[4] , const double yv[4] ,
@@ -252,6 +260,7 @@ cu_pt_compute_all_kernels(
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
+__host__
 void
 cu_pt_compute_all_kernels_SYMXY_v2(
     const double xv[4] , const double yv[4] ,
@@ -262,6 +271,7 @@ cu_pt_compute_all_kernels_SYMXY_v2(
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
+__host__
 void
 cu_pt_compute_all_kernels_SYMXY(
     const double xv[4] , const double yv[4] ,
@@ -272,6 +282,7 @@ cu_pt_compute_all_kernels_SYMXY(
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
+__host__
 void
 cu_pt_compute_all_kernels_SYMXY0_v2(
     const double xv[4] , const double yv[4] ,
@@ -282,6 +293,7 @@ cu_pt_compute_all_kernels_SYMXY0_v2(
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
+__host__
 void
 cu_pt_compute_all_kernels_SYMXY0(
     const double xv[4] , const double yv[4] ,
@@ -292,6 +304,7 @@ cu_pt_compute_all_kernels_SYMXY0(
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
+__host__
 void
 cu_pt_compute_all_Mkernels(
     const double M[4], const double xv[4] , const double yv[4] ,
@@ -302,6 +315,7 @@ cu_pt_compute_all_Mkernels(
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
+__host__
 void
 cu_pt_compute_all_Mkernels_v2(
     const double M[4], const double xv[4] , const double yv[4] ,
@@ -312,6 +326,7 @@ cu_pt_compute_all_Mkernels_v2(
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
+__host__
 void
 cu_pt_compute_con_kernels(
     const double xv[4] , const double yv[4] ,
@@ -322,6 +337,7 @@ cu_pt_compute_con_kernels(
   checkCudaErrors(cudaMemcpy(K, d_K, sizeof(QED_Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
+__host__
 void
 cu_pt_compute_con_kernels_v2(
     const double xv[4] , const double yv[4] ,
@@ -332,6 +348,7 @@ cu_pt_compute_con_kernels_v2(
   checkCudaErrors(cudaMemcpy(K, d_K, 3*sizeof(Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
+__host__
 void
 cu_pt_compute_con_kernelsM_L2(
     const double M[4], const double xv[4] , const double yv[4] ,
@@ -342,6 +359,7 @@ cu_pt_compute_con_kernelsM_L2(
   checkCudaErrors(cudaMemcpy(K, d_K, 3*sizeof(Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
+__host__
 void
 cu_pt_compute_sub_kernelsM_L2(
     const double M[4], const double xv[4] , const double yv[4] ,
@@ -352,6 +370,7 @@ cu_pt_compute_sub_kernelsM_L2(
   checkCudaErrors(cudaMemcpy(K, d_K, 3*sizeof(Kernels), cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaFree(d_K));
 }
+__host__
 void
 cu_arr_ipihatFermLoop_antisym(
     const Vec4 *xv , const Vec4 *yv , const unsigned n ,
@@ -377,6 +396,7 @@ cu_arr_ipihatFermLoop_antisym(
 // pretend discrete volume
 static const size_t LVOLUME = (2*2*2*4) ;
 
+__host__
 static void
 HLBL_crds( double x[4] ,
 	   const size_t idx )
@@ -389,6 +409,7 @@ HLBL_crds( double x[4] ,
 }
 
 // test that all elements of kernel are zero
+__host__
 static bool
 kernel_nonzero( const double *kerv )
 {
@@ -402,12 +423,14 @@ kernel_nonzero( const double *kerv )
   return false ;
 }
 
+__host__
 static void
 printbar( void )
 {
   fprintf( stdout , "\n-----------------------------------------------------\n" ) ;
 }
 
+__host__
 static void
 print_header( int i )
 {
@@ -416,6 +439,7 @@ print_header( int i )
 }
 
 // printing utility
+__host__
 static void
 print_kernels( const double *kerv ,
 	       const double *kerv2 ,
@@ -439,6 +463,7 @@ print_kernels( const double *kerv ,
 }
 
 // contracts the kernel with pihat
+__host__
 static void
 example1( const struct QED_kernel_temps t )
 {  
@@ -513,6 +538,7 @@ example1( const struct QED_kernel_temps t )
 }
 
 // computes the L0 kernel with xy and with x = 0
+__host__
 static void
 example2( const struct QED_kernel_temps t )
 {
@@ -553,6 +579,7 @@ example2( const struct QED_kernel_temps t )
 }
 
 // tests some identities for the different L-kernels
+__host__
 void
 example3( const struct QED_kernel_temps t )
 {
@@ -603,6 +630,7 @@ example3( const struct QED_kernel_temps t )
 }
 
 // computes the L0 kernel triggering the MYSWAP
+__host__
 static void
 example4( const struct QED_kernel_temps t )
 {
@@ -629,6 +657,7 @@ example4( const struct QED_kernel_temps t )
 }
 
 // computes the L0 kernel triggering the taylor expansions
+__host__
 static void
 example5( const struct QED_kernel_temps t )
 {
@@ -656,6 +685,7 @@ example5( const struct QED_kernel_temps t )
 }
 
 // computes the L0 kernel for some realistic example
+__host__
 static void
 example6( const struct QED_kernel_temps t )
 {
@@ -711,6 +741,7 @@ example7( const struct QED_kernel_temps t )
 }
 
 // see if we can use L(x,0) instead of L(x,x)
+__host__
 static void
 example9( const struct QED_kernel_temps t )
 {
@@ -753,6 +784,7 @@ example9( const struct QED_kernel_temps t )
 }
 
 // check L(x,0) and L(0,x)
+__host__
 static void
 example10( const struct QED_kernel_temps t )
 {
@@ -778,6 +810,7 @@ example10( const struct QED_kernel_temps t )
 }
 
 // test that L(x,y) == -L(-x,-y)
+__host__
 static void
 example11( const struct QED_kernel_temps t )
 {
@@ -855,6 +888,7 @@ example11( const struct QED_kernel_temps t )
   return ;
 }
 
+__host__
 static bool
 equivalent_kernels( double K1[6][4][4][4] ,
 		    double K2[6][4][4][4] )
@@ -872,6 +906,7 @@ equivalent_kernels( double K1[6][4][4][4] ,
 }
 
 // test that our compute_all_kernels routine works
+__host__
 static void
 example12( const struct QED_kernel_temps t )
 {
@@ -942,6 +977,7 @@ example12( const struct QED_kernel_temps t )
 }
 
 // test our SYMXY compute all kernels code
+__host__
 static void
 example13( const struct QED_kernel_temps t )
 {
@@ -999,6 +1035,7 @@ example13( const struct QED_kernel_temps t )
 }
 
 // test our SYMXY0 compute all kernels code
+__host__
 static void
 example14( const struct QED_kernel_temps t )
 {
@@ -1095,6 +1132,7 @@ example14( const struct QED_kernel_temps t )
 }
 
 // test that L(x-y,0) == -L(y-x,0) && L(0,x-y) == -L(0,y-x) 
+__host__
 static void
 example15( const struct QED_kernel_temps t )
 {
@@ -1151,6 +1189,7 @@ example15( const struct QED_kernel_temps t )
 
 // test our SYMXY0 compute all kernels code again by computing
 // the individual kernels and then symmetrising them
+__host__
 static void
 example16( const struct QED_kernel_temps t )
 {
@@ -1229,6 +1268,7 @@ example16( const struct QED_kernel_temps t )
 
 // test our SYMXY0 compute all kernels code again by computing
 // the individual kernels and then symmetrising them
+__host__
 static void
 example17( const struct QED_kernel_temps t )
 {
@@ -1323,6 +1363,7 @@ example17( const struct QED_kernel_temps t )
 }
 
 // test the con_kernels_v2 routines
+__host__
 static void
 example18( const struct QED_kernel_temps t )
 {
@@ -1426,6 +1467,7 @@ example18( const struct QED_kernel_temps t )
 }
 
 // test the swap_munu_Lyx routine
+__host__
 static void
 example19( const struct QED_kernel_temps t )
 {
@@ -1494,6 +1536,7 @@ example19( const struct QED_kernel_temps t )
 }
 
 // test the  routine
+__host__
 static void
 example20( const struct QED_kernel_temps t )
 {
@@ -1575,6 +1618,7 @@ example20( const struct QED_kernel_temps t )
 }
 
 // test the compute_all_Mkernels
+__host__
 static void
 example21( const struct QED_kernel_temps t )
 {
@@ -1650,6 +1694,7 @@ example21( const struct QED_kernel_temps t )
 }
 
 // test the compute_all_Mkernels
+__host__
 static void
 example22( const struct QED_kernel_temps t )
 {
@@ -1677,6 +1722,7 @@ example22( const struct QED_kernel_temps t )
   return ;
 }
 
+__host__
 static void
 example23( const struct QED_kernel_temps t )
 {  
@@ -1740,6 +1786,7 @@ example23( const struct QED_kernel_temps t )
 }
 
 // test the routine
+__host__
 static void
 example24( const struct QED_kernel_temps t )
 {
@@ -1824,6 +1871,7 @@ example24( const struct QED_kernel_temps t )
 }
 
 // gives us an idea of how long it takes for V full kernel calls
+__host__
 static void
 stress_test( const struct QED_kernel_temps t )
 {  
@@ -1859,6 +1907,7 @@ stress_test( const struct QED_kernel_temps t )
 }
 
 // just an example of how to call the code and a few simple examples/tests
+__host__
 int
 main( void )
 {  

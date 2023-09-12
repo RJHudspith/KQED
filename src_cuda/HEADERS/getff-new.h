@@ -4,7 +4,7 @@
 #include "KQED.h"
 
 // accesses V apparently
-__device__
+__device__ KQED_PRIVATE
 double
 accessv( const bool flag_hy , const bool use_y_derivs,
 	 const int ix, const int iy,
@@ -13,18 +13,18 @@ accessv( const bool flag_hy , const bool use_y_derivs,
 	 const struct Grid_coeffs Grid ) ;
 
 // performs search on a sorted list returning the closest coordinate
-__device__
+__device__ KQED_PRIVATE
 int
 find_ind( const double *arr , const double target ,
        const int lo , const int hi ) ;
 
-__device__
+__device__ KQED_PRIVATE
 double
 extractff( const FFidx nm, const bool ndy, const NDCB ndcb ,
 	   const struct invariants Inv ,
 	   const struct Grid_coeffs Grid ) ;
 
-__device__
+__device__ KQED_PRIVATE
 void
 extractff2( const FFidx nm, const NDCB ndcb ,
 	    const struct invariants Inv ,
@@ -42,14 +42,14 @@ lerp( const double a ,
 }
 
 // precompute all this business for x and y
-__device__
+__device__ KQED_PRIVATE
 void
 precompute_INV( struct intprecomp *INV ,
 		 const double y ,
 		 const double y1 ,
 		 const double y2 ,
 		 const size_t idx ) ;
-__device__
+__device__ KQED_PRIVATE
 void
 precompute_INVx( struct intprecomp *INVx ,
 		 const double y ,
@@ -67,7 +67,7 @@ SCALPROD( const double xv[4] ,
 }
 
 // initialises the invariants struct
-__device__
+__device__ KQED_PRIVATE
 struct invariants
 set_invariants( const double xv[4] ,
 		const double yv[4] ,

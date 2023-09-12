@@ -325,7 +325,7 @@ get_dv( const double x ,
 }
 
 // returns dv[alf][bet][dta] = \partial^(x)_\alpha (\partial^(x)_\beta + \partial^(y)_\beta) < \epsilon_\delta I>_\epsilon
-__device__
+__device__ KQED_PRIVATE
 int
 chnr_dV( const double xv[4] ,
 	 const double yv[4] ,
