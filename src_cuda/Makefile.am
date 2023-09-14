@@ -52,12 +52,12 @@ if !PREF
 
 Bindir = "${prefix}"/bin
 
-bin_PROGRAMS = KQED_CUDA
+bin_PROGRAMS = KQED
 
-KQED_CUDA_SOURCES = amu_forlattice.cu
-KQED_CUDA_CFLAGS = $(CUDA_CFLAGS) $(INCLUDES) $(CFLAGS)
-KQED_CUDA_LDADD = libKQED_cuda.a ${LDFLAGS} -lm $(CUDA_LIBS) $(CUDA_LDFLAGS) -lcudart
-KQED_CUDA_LINK = $(NVCC) $(NVCCFLAGS) --compiler-options="$(KQED_CUDA_CFLAGS)" $(KQED_CUDA_LDFLAGS) $(LDFLAGS) -o $@
+KQED_SOURCES = amu_forlattice.cu
+KQED_CFLAGS = $(CUDA_CFLAGS) $(INCLUDES) $(CFLAGS)
+KQED_LDADD = libKQED_cuda.a ${LDFLAGS} -lm $(CUDA_LIBS) $(CUDA_LDFLAGS) -lcudart
+KQED_LINK = $(NVCC) $(NVCCFLAGS) --compiler-options="$(KQED_CUDA_CFLAGS)" $(KQED_CUDA_LDFLAGS) $(LDFLAGS) -o $@
 
 endif
 
