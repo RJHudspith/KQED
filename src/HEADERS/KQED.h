@@ -17,7 +17,13 @@
 #include "config.h"
 
 // alignment block
-#define KQED_ALIGN
+#if (defined HAVE_IMMINTRIN_H) && (defined __AVX__)
+  #include <immintrin.h>
+  #define KQED_ALIGNMENT (32)
+  #define KQED_ALIGN __attribute__((aligned(KQED_ALIGNMENT)))
+#else
+  #define KQED_ALIGN
+#endif
 
 // with my version of gcc and -std=c99 this is not defined
 #ifndef M_PI
@@ -127,6 +133,9 @@ struct QED_Con_Kernels {
 // little precompu storage
 struct intprecomp {
   double A , B , C1 , C2 , D , lA ;
+#if (defined HAVE_IMMINTRIN_H) && (defined __AVX__)
+  __m256d a , b , c1 , c2 , d , la , y12 ;
+#endif
   size_t idx ;
 } ;
 

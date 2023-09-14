@@ -6,6 +6,7 @@
 
 #include "cheby.h"     // chebUsum and alike
 #include "getff-new.h" // alphabetising
+#include "simd.h"      // Mine and Jeremy's AVX routines
 
 // interpolation function
 // dy should be set to y1-y2
@@ -44,28 +45,14 @@ precompute_INVx( struct intprecomp *INVx ,
   INVx -> C2  = (ym1sq)*(ymy2)*dy ;
   INVx -> D   = 1./(dy*dy*dy) ;
   INVx -> lA  = (y2-y)/(y2-y1) ;
-}
-
-// precompute all this business for Y
-void
-precompute_INV( struct intprecomp *INVy ,
-		const double y ,
-		const double y1 ,
-		const double y2 ,
-		const size_t idx )
-{
-  INVy -> idx = idx ;
-  register const double dy = y1-y2 ;
-  register const double ymy1 = y-y1 ;
-  register const double ymy2 = y-y2 ;
-  register const double ym2sq = (ymy2*ymy2) ;
-  register const double ym1sq = (ymy1*ymy1) ;
-  INVy -> A = -(ym2sq)*(2*y - 3*y1 + y2) ;
-  INVy -> B = (ym1sq)*(2*y + y1 - 3*y2) ;
-  INVy -> C1 = (ymy1)*(ym2sq)*dy ;
-  INVy -> C2 = (ym1sq)*(ymy2)*dy ;
-  INVy -> D = 1./(dy*dy*dy) ;
-  INVy -> lA = (y2-y)/(y2-y1) ;
+#if (defined HAVE_IMMINTRIN_H) && (defined __AVX__)
+  INVx -> y12 = _mm256_setr_pd( y1, y2, y1, y2 ) ;
+  INVx -> a   = _mm256_setr_pd( INVx->A , 1.0/INVx->D , INVx->A , INVx->A ) ;
+  INVx -> b   = _mm256_setr_pd( INVx->B , INVx->lA/INVx->D , INVx->B , INVx->B ) ;
+  INVx -> c1  = _mm256_setr_pd( INVx->C1 , -INVx->lA/INVx->D , INVx->C1 , INVx->C1 ) ;
+  INVx -> c2  = _mm256_setr_pd( INVx->C2 , 0.0 , INVx->C2 , INVx->C2 ) ;
+  INVx -> d   = _mm256_broadcast_sd( &(INVx->D)  ) ;
+#endif
 }
 
 static inline double
@@ -77,6 +64,31 @@ interpol4( const struct intprecomp INVx ,
 {
   return (f1*INVx.A + f2*INVx.B + g1*INVx.C1 + g2*INVx.C2)*INVx.D ; 
 }
+
+#if (defined HAVE_IMMINTRIN_H) && (defined __AVX__)
+static inline void
+interpol5( double F[4] ,
+	   const struct intprecomp INVx ,
+	   const double f[16] )
+{
+  register const __m256d YMM0 = _mm256_setr_pd( f[8]  , f[3] , f[4] , f[0] ) ;
+  register const __m256d YMM1 = _mm256_setr_pd( f[9]  , f[2] , f[5] , f[1] ) ;
+  register const __m256d YMM2 = _mm256_setr_pd( f[10] , f[3] , f[6] , f[2] ) ;
+  register const __m256d YMM3 = _mm256_setr_pd( f[11] , 0.0  , f[7] , f[3] ) ;
+  __m256d *Y = (__m256d*)F ;
+  *Y = _mm256_mul_pd( YMM0 , INVx.a ) ;
+  #ifdef __FMA__
+  *Y = _mm256_fmadd_pd( YMM1 , INVx.b , *Y ) ;
+  *Y = _mm256_fmadd_pd( YMM2 , INVx.c1 , *Y ) ;
+  *Y = _mm256_fmadd_pd( YMM3 , INVx.c2 , *Y ) ;
+  #else
+  *Y = _mm256_add_pd( _mm256_mul_pd( YMM1 , INVx.b ) , *Y ) ;
+  *Y = _mm256_add_pd( _mm256_mul_pd( YMM2 , INVx.c1 ) , *Y ) ;
+  *Y = _mm256_add_pd( _mm256_mul_pd( YMM3 , INVx.c2 ) , *Y ) ;
+  #endif
+  *Y = _mm256_mul_pd( *Y , INVx.d ) ;
+}
+#endif
 
 // function pointer for cheby stuff
 static double (*Func_usm[4])( const int , const double , const double *) = \
@@ -208,6 +220,19 @@ extractff( const FFidx nm, const bool ndy, const NDCB ndcb,
  
   const bool use_x_derivs = (nm<dxQG0 || nm==dxQG2 || nm==dxQG3) ;
 
+#if (defined HAVE_IMMINTRIN_H) && (defined __AVX__)
+  if (!flag_hx && !flag_hy) {
+    double f[4] KQED_ALIGN ;
+    accessv6( Inv.INVx.idx, nm, ndy, ndcb, Inv.cb, Grid, PC, Inv.INVy , f );    
+    if(use_x_derivs) {
+      return interpol4( Inv.INVx , f[0], f[1], f[2], f[3] ) ;
+    } else {
+      // lerpity lerp
+      return lerp( Inv.INVx.lA , f[0] , f[1] ) ;
+    }
+  }
+#endif
+  
   const int ix = Inv.INVx.idx , iy = Inv.INVy.idx ; 
   const bool use_y_derivs = (ndy==false) ;
   const double f1iy = accessv( flag_hy, use_y_derivs, ix, iy, nm,
@@ -241,6 +266,33 @@ extractff2( const FFidx nm,
 	    const struct AVX_precomps *PC ,
 	    double F[4] )
 {  
+#if (defined HAVE_IMMINTRIN_H) && (defined __AVX__)
+  const bool flag_hx = ( Inv.x >= Grid.XX[ Grid.nstpx-1 ] ) ;
+  const bool flag_hy = ( Inv.y >= Grid.YY[ Grid.nstpy-1 ] ) ;
+
+  // otherwise we use the precomputed data
+  if (!flag_hx && !flag_hy) {
+    double f[16] KQED_ALIGN ;
+    accessv7( Inv.INVx.idx, nm, ndcb, Inv.cb, Grid, PC, Inv.INVy , f );
+    interpol5( F , Inv.INVx , f ) ;
+  } else {
+    // derivative map
+    const int ndcb2 = ndcb+1 < 5 ? ndcb+1 : ndcb ;
+    // map for the x-derivative, incomplete as some derivatives aren't used
+    const int dxmap[14] = { dxQG0  , dxQG1 , dxQG2  , dxQG3  , dxQL4 , dxQL2 ,
+			    dxQG0  , dxQG1 , d2xQG2 , d2xQG3 , dxQL4 , dxQL2 ,
+			    d2xQG2 , d2xQG3 } ;
+    // derivative wrt dcb
+    F[0] = extractff( nm, false , ndcb2 , Inv , Grid , PC ) ;
+    // derivative wrt x
+    F[1] = extractff( dxmap[nm], false , ndcb  , Inv , Grid , PC ) ;
+    // derivative wrt y
+    F[2] = extractff( nm, true  , ndcb  , Inv , Grid , PC ) ;
+    // no derivative
+    F[3] = extractff( nm, false , ndcb  , Inv , Grid , PC ) ;
+  }
+  return ;
+#else  
   // derivative map
   const int ndcb2 = ndcb+1 < 5 ? ndcb+1 : ndcb ;
   // map for the x-derivative, incomplete as some derivatives aren't used
@@ -255,6 +307,7 @@ extractff2( const FFidx nm,
   F[2] = extractff( nm, true  , ndcb  , Inv , Grid , PC ) ;
   // no derivative
   F[3] = extractff( nm, false , ndcb  , Inv , Grid , PC ) ;
+#endif
   return ;
 }
 

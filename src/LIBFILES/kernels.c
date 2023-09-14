@@ -56,10 +56,24 @@ atomic_kernel_Saxpy( double *kerv ,
   int i ;
   // although not strictly necessary is a nice proof that we
   // are correctly aligned to the boundary
+#if (defined HAVE_IMMINTRIN_H) && (defined __AVX__)
+  register const __m256d s = _mm256_set_pd( S , S , S , S ) ;
+  const __m256d *ktP = (const __m256d*)kt ;
+  __m256d *kP = (__m256d*)kerv ; 
+  for( i = 0 ; i < 96 ; i++ ) {
+    #ifdef __FMA__
+    *kP = _mm256_fmadd_pd( *ktP , s , *kP ) ;
+    #else
+    *kP = _mm256_add_pd( *kP , _mm256_mul_pd( *ktP , s ) ) ;
+    #endif
+    kP++ ; ktP++ ;
+  }
+#else
   for( i = 0 ; i < 384 ; i++ ) {
     *kerv += *kt * S ;
     kerv++ ; kt++ ;
   }
+#endif
   return ;
 }
 
