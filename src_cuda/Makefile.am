@@ -4,8 +4,7 @@ BUILDDIR=@top_builddir@
 lib_LIBRARIES = libKQED_cuda.a
 
 ## just include the header directory
-# AM_CFLAGS=-I${TOPDIR}/src_cuda/HEADERS/
-AM_CPPFLAGS=-I./HEADERS/
+AM_CFLAGS=-I${TOPDIR}/src_cuda/HEADERS/
 
 OLDLIBFILES=./LIBFILES/all_kernels.cu \
 	./LIBFILES/cheby.cu ./LIBFILES/chnr_dV.cu ./LIBFILES/chnr_dS.cu \
@@ -27,16 +26,17 @@ UTILSFILES=./UTILS/GLU_timer.c ./UTILS/GLU_bswap.c ./UTILS/crc32c.c
 libKQED_cuda_a_SOURCES = ${LIBFILES} ${UTILSFILES}
 libKQED_cuda_a_AR = $(NVCC) $(NVCCFLAGS) -lib -o
 libKQED_cuda_a_LIBADD = $(CUDA_LIBS)
-libKQED_cuda_a_CFLAGS = $(CUDA_CFLAGS) $(INCLUDES) $(CFLAGS)
+libKQED_cuda_a_CFLAGS = $(CUDA_CFLAGS) $(INCLUDES) $(CFLAGS) $(AM_CFLAGS)
 
+## don't know if AM_*FLAGS need to be explicit here or if there is a better way
 .cu.o:
 	$(NVCC) $(NVCCFLAGS) $(INCLUDES) $(DEFS) $(DEFAULT_INCLUDES) \
-	--compiler-options="$(CFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS)" \
+	--compiler-options="$(CFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(AM_CPPFLAGS)" \
 	-Xcicc -O2 -dc -o $@ $< # cicc O3 takes forever
-.c.o:
-	$(NVCC) -x cu $(NVCCFLAGS) $(INCLUDES) $(DEFS) $(DEFAULT_INCLUDES) \
-	--compiler-options="$(CFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS)" \
-	-dc -o $@ $<
+# .c.o:
+# 	$(NVCC) -x cu $(NVCCFLAGS) $(INCLUDES) $(DEFS) $(DEFAULT_INCLUDES) \
+# 	--compiler-options="$(CFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(AM_CPPFLAGS)" \
+# 	-dc -o $@ $<
 
 ## and their respective headers
 include_HEADERS = \

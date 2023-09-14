@@ -13,27 +13,26 @@ AC_CONFIG_MACRO_DIR([m4])
 
 ## Set up CUDA
 AX_CUDA
-AC_MSG_NOTICE([CUDA tools version $NVCC_VERSION])
 
 ## prefix!!
 AC_DEFINE_UNQUOTED([HAVE_PREFIX],["$prefix"],[Look for where we prefix to])
 
 ## tell the code where the PRECOMP library is -> Here & only here!
-AC_DEFINE_UNQUOTED([LIB_PATH],["$PWD"],[Where the library and precomps are])
+AC_MSG_NOTICE([Setting LIB_PATH "$prefix"])
+AC_DEFINE_UNQUOTED([LIB_PATH],["$prefix"],[Where the library and precomps are])
 	  
 ## Tells us where we are prefixed to
 AC_MSG_NOTICE([Configuring for location "$prefix"])
 ## If we prefix away from the default /usr/ then create binary GLU
 ## will still try and create shared object libraries there
 AM_CONDITIONAL([PREF],[ test "$prefix" == "NONE" ])
-   if test "$prefix" == "NONE" ; then
-       AC_MSG_NOTICE([Not creating binary "URFIT"])
-   else
-       AC_MSG_NOTICE([Creating binary "URFIT" in $prefix/bin])
-       mkdir $prefix  
-       mkdir $prefix/bin/
-       cp -vp PRECOMP/REG* $prefix/bin
-   fi
+   dnl if test "$prefix" == "NONE" ; then
+   dnl     AC_MSG_NOTICE([Not creating binary "URFIT"])
+   dnl else
+   dnl     AC_MSG_NOTICE([Creating binary "URFIT" in $prefix/bin])
+   dnl     mkdir -p $prefix/bin/
+   dnl     cp -vp PRECOMP/REG* $prefix/bin
+   dnl fi
 AC_SUBST(PREF)
 
 ## C standard libraries

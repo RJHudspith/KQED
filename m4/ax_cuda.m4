@@ -58,7 +58,7 @@ AC_ARG_WITH([cuda],
 	fi
 ],
 [
-	want_cuda="yes"
+	want_cuda="no"
 ])
 
 AM_CONDITIONAL(USE_CUDA, test "x${want_cuda}" = xyes)
@@ -172,11 +172,6 @@ then
 		have_cuda="no"
 		AC_MSG_ERROR([Cuda is requested but not available])
 	fi
-fi
-
-AC_SUBST(CUDA_CFLAGS)
-AC_SUBST(CUDA_LIBS)
-AC_SUBST(NVCC)
 
 # Fast math
 AC_ARG_WITH([cuda-fast-math],
@@ -229,5 +224,11 @@ then
 fi
 
 AC_MSG_NOTICE([Using NVCCFLAGS=$NVCCFLAGS])
+
+fi
+
+AC_SUBST(CUDA_CFLAGS)
+AC_SUBST(CUDA_LIBS)
+AC_SUBST(NVCC)
 AC_SUBST(NVCCFLAGS)
 ])
