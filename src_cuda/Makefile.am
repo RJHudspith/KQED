@@ -57,7 +57,7 @@ bin_PROGRAMS = KQED
 KQED_SOURCES = amu_forlattice.cu
 KQED_CFLAGS = $(CUDA_CFLAGS) $(INCLUDES) $(CFLAGS)
 KQED_LDADD = libKQED_cuda.a ${LDFLAGS} -lm $(CUDA_LIBS) $(CUDA_LDFLAGS) -lcudart
-KQED_LINK = $(NVCC) $(NVCCFLAGS) --compiler-options="$(KQED_CUDA_CFLAGS)" $(KQED_CUDA_LDFLAGS) $(LDFLAGS) -o $@
+KQED_LINK = $(NVCC) $(NVCCFLAGS) --compiler-options="$(KQED_CFLAGS)" $(KQED_LDFLAGS) $(LDFLAGS) -o $@
 
 endif
 
