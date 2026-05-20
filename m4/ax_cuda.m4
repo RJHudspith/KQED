@@ -198,17 +198,18 @@ AC_ARG_WITH([cuda-fast-math],
 target_arch=""
 AC_ARG_WITH([target-gpu-arch],
 	AS_HELP_STRING(
-	[--with-target-gpu-arch@<:@=60,61,70,75,80,86@:>@],
+	[--with-target-gpu-arch@<:@=60,61,70,75,80,86,90@:>@],
 	[Primary architecture to compile for (default=86)]),
 [
 	if test "$withval" = "86" ; then target_arch=86 
+	elif  test "$withval" = "90" ; then target_arch=90
 	elif  test "$withval" = "80" ; then target_arch=80
 	elif  test "$withval" = "75" ; then target_arch=75
 	elif  test "$withval" = "70" ; then target_arch=70
 	elif  test "$withval" = "61" ; then target_arch=61
 	elif  test "$withval" = "60" ; then target_arch=60
 	else
-		AC_MSG_ERROR([Requested target-gpu-arch must be in 60,61,70,75,80,86, not $withval])
+		AC_MSG_ERROR([Requested target-gpu-arch must be in 60,61,70,75,80,86,90, not $withval])
 	fi
 	
 ], [ target_arch="86"] )

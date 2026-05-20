@@ -211,7 +211,10 @@ lsrch( const double *arr, const double target,
     const int lo, const int hi ) {
   int index = lo;
   for (int i = lo; i < hi; ++i) {
-    index = (arr[i] <= target && target <= arr[i+1]) ? i : index;
+    index = (arr[i] <= target && target < arr[i+1]) ? i : index;
+  }
+  if (arr[hi-1] <= target) {
+    index = hi - 1;
   }
   return index;
 }
@@ -223,10 +226,10 @@ __device__ KQED_PRIVATE
 int
 find_ind(const double *arr, const double target,
     const int lo, const int hi) {
-  // NOTE: this is not well-suited for GPU execution
-  // return bsrch(arr, target, lo, hi);
-  // Better option:
-  return lsrch(arr, target, lo, hi);
+  // Option: binary search
+  return bsrch(arr, target, lo, hi);
+  // Option: linear search
+  //return lsrch(arr, target, lo, hi);
 }
 
 // extract the form factor
